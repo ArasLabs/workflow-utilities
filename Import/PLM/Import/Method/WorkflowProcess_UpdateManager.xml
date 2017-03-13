@@ -1,0 +1,64 @@
+﻿<AML>
+ <Item type="Method" id="B3C2056612EF4339B5B8A4DF268E8AE5" action="add">
+  <comments>Updates managed_by_id on WF Process and all its related Activities</comments>
+  <execution_allowed_to keyed_name="Super User" type="Identity">6B14D33C4A7D41C188CCF2BC15BD01A3</execution_allowed_to>
+  <method_code><![CDATA[' must be run with Super User permissions !!!
+' the item context is expected to be of itemType = "Workflow Process"
+'System.Diagnostics.Debugger.Break()
+Dim thisId As String = Me.GetID()
+Dim thisType As String = Me.GetType()
+If thisType <> "Workflow Process" Then Return Me 'nothing to do
+
+Dim newManagedById As String = Me.getProperty("managed_by_id","")
+If newManagedById = "" Then Return Me 'nothing to do
+
+Dim inn As Innovator = Me.getInnovator()
+
+' use SQL to update "Workflow Process" ManagedById
+Dim tableName As String = "[Workflow_Process]"
+Dim SQLstr As String = ""
+SQLstr = SQLstr & "UPDATE " & tableName
+SQLstr = SQLstr & " SET " & tableName & ".managed_by_id='" & newManagedById & "'"
+SQLstr = SQLstr & " WHERE " & tableName & ".id='" & thisId & "'"
+Dim res As Item = inn.ApplySQL(SQLstr)
+If res.isError() Then Return res
+
+' use SQL to update the related "Workflow" item's ManagedById
+tableName = "[Workflow]"
+SQLstr = ""
+SQLstr = SQLstr & "UPDATE " & tableName
+SQLstr = SQLstr & " SET " & tableName & ".managed_by_id='" & newManagedById & "'"
+SQLstr = SQLstr & " WHERE " & tableName & ".related_id='" & thisId & "'"
+res = inn.ApplySQL(SQLstr)
+If res.isError() Then Return res
+
+Dim qry As Item = Me.newItem("Workflow Process Activity","get")
+qry.setAttribute("select","source_id,related_id(id,name,state,managed_by_id,locked_by_id)")
+qry.setProperty("source_id",thisId)
+qry = qry.apply()
+
+Dim i As Integer
+tableName = "[Activity]"
+For i=0 To qry.getItemCount()-1
+  Dim activityId As String = qry.getItemByIndex(i).getProperty("related_id","")
+  If activityId <> "" Then
+    Dim actvityItem As Item = qry.getItemByIndex(i).getPropertyItem("related_id")
+    
+    If actvityItem.getProperty("state","") <> "Closed" Then
+      'update each activity's managed_by_id via SQL  
+      SQLstr = SQLstr & "UPDATE " & tableName
+      SQLstr = SQLstr & " SET " & tableName & ".managed_by_id='" & newManagedById & "'"
+      SQLstr = SQLstr & " WHERE " & tableName & ".id='" & activityId & "'"
+      res = inn.ApplySQL(SQLstr)
+      If res.isError() Then Return res
+    End If
+  End If
+
+Next i
+
+Return Me
+]]></method_code>
+  <method_type>VB</method_type>
+  <name>WorkflowProcess_UpdateManager</name>
+ </Item>
+</AML>

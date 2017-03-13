@@ -1,0 +1,173 @@
+﻿<AML>
+ <Item type="Workflow Map" id="4CBF4BB7BFAF41E1AE61C2558A45F1CB" action="add">
+  <description xml:lang="en">Express DCO Workflow</description>
+  <label xml:lang="en">Express DCO</label>
+  <name>Single Review Express DCO</name>
+  <node_bg_color></node_bg_color>
+  <node_label1_color></node_label1_color>
+  <node_label1_font></node_label1_font>
+  <node_label2_color></node_label2_color>
+  <node_label2_font></node_label2_font>
+  <node_name_color></node_name_color>
+  <node_name_font></node_name_font>
+  <node_size></node_size>
+  <process_owner keyed_name="CM" type="Identity">F6624E9AE5504958A84E4B6A5831298B</process_owner>
+  <transition_line_color></transition_line_color>
+  <transition_name_color></transition_name_color>
+  <transition_name_font></transition_name_font>
+  <Relationships>
+   <Item type="Workflow Map Activity" id="4E5E6A002FCC4AB2852B78C247BA563F" action="add">
+    <related_id keyed_name="Close Change" type="Activity Template">
+     <Item type="Activity Template" id="9D657F9AA18F4D46A027792F38E03E86" action="add">
+      <can_delegate>0</can_delegate>
+      <can_refuse>0</can_refuse>
+      <consolidate_ondelegate>0</consolidate_ondelegate>
+      <icon>../images/Icons/20x20/20x20_checkmark.gif</icon>
+      <is_auto>1</is_auto>
+      <is_end>1</is_end>
+      <is_start>0</is_start>
+      <label xml:lang="en">Close Change</label>
+      <managed_by_id keyed_name="Owner" type="Identity">538B300BB2A347F396C436E9EEE1976C</managed_by_id>
+      <message xml:lang="en">Workflow End</message>
+      <name>Close Change</name>
+      <priority>1</priority>
+      <wait_for_all_inputs>0</wait_for_all_inputs>
+      <wait_for_all_votes>0</wait_for_all_votes>
+      <x>392</x>
+      <y>53</y>
+      <Relationships>
+       <Item type="Activity Template Transition" id="CB7544A7809342AF888060B7751D944A" action="add">
+        <controlled_itemtype keyed_name="Express DCO" type="ItemType" name="Express DCO">B678FAF40F7246A7925FB5B116988915</controlled_itemtype>
+        <event>on_activate</event>
+        <related_id keyed_name="77D93E77378A4CE2AEA4255BE989625A" type="Life Cycle Transition">77D93E77378A4CE2AEA4255BE989625A</related_id>
+        <sort_order>128</sort_order>
+        <source_id keyed_name="Close Change" type="Activity Template">9D657F9AA18F4D46A027792F38E03E86</source_id>
+       </Item>
+      </Relationships>
+     </Item>
+    </related_id>
+    <sort_order>128</sort_order>
+    <source_id keyed_name="Single Review  Express DCO" type="Workflow Map">4CBF4BB7BFAF41E1AE61C2558A45F1CB</source_id>
+   </Item>
+   <Item type="Workflow Map Activity" id="8F60BE1B8451459BA50D4009CC7B59D6" action="add">
+    <related_id keyed_name="Review Drafted Changes" type="Activity Template">
+     <Item type="Activity Template" id="66E01693619F43F98669276AF9518D62" action="add">
+      <can_delegate>1</can_delegate>
+      <can_refuse>1</can_refuse>
+      <consolidate_ondelegate>0</consolidate_ondelegate>
+      <icon>../images/Icons/20x20/20x22_gray_ball.gif</icon>
+      <is_auto>0</is_auto>
+      <is_end>0</is_end>
+      <is_start>0</is_start>
+      <label xml:lang="en">Review Drafted Changes</label>
+      <managed_by_id keyed_name="Owner" type="Identity">538B300BB2A347F396C436E9EEE1976C</managed_by_id>
+      <message xml:lang="en">Update affected documents</message>
+      <name>Review Drafted Changes</name>
+      <wait_for_all_inputs>0</wait_for_all_inputs>
+      <wait_for_all_votes>0</wait_for_all_votes>
+      <x>230</x>
+      <y>53</y>
+      <Relationships>
+       <Item type="Activity Template Assignment" id="0D4CDCA552B240A794B0809615D21596" action="add">
+        <for_all_members>0</for_all_members>
+        <is_required>0</is_required>
+        <related_id keyed_name="Owner" type="Identity">
+         <Item type="Identity" action="get" select="id">
+          <name>Owner</name>
+         </Item>
+        </related_id>
+        <sort_order>128</sort_order>
+        <source_id keyed_name="Review Drafted Changes" type="Activity Template">66E01693619F43F98669276AF9518D62</source_id>
+        <voting_weight>100</voting_weight>
+       </Item>
+       <Item type="Activity Template Task" id="81FF16F19BB64F758DF3169A84D6B89F" action="add">
+        <description xml:lang="en">Review the change form for instructions on the changes to be made</description>
+        <is_required>0</is_required>
+        <sequence>1</sequence>
+        <sort_order>128</sort_order>
+        <source_id keyed_name="Review Drafted Changes" type="Activity Template">66E01693619F43F98669276AF9518D62</source_id>
+       </Item>
+       <Item type="Activity Template Task" id="9BFD58CDB6C84915969FA6B03C07999B" action="add">
+        <description xml:lang="en">Once your updates are finished, vote Complete to mark your work as done</description>
+        <is_required>0</is_required>
+        <sequence>3</sequence>
+        <sort_order>384</sort_order>
+        <source_id keyed_name="Review Drafted Changes" type="Activity Template">66E01693619F43F98669276AF9518D62</source_id>
+       </Item>
+       <Item type="Activity Template Task" id="D5AF2AF434B2461E857638867D33D0AA" action="add">
+        <description xml:lang="en">Make changes to the new revisions of affected documents</description>
+        <is_required>0</is_required>
+        <sequence>2</sequence>
+        <sort_order>256</sort_order>
+        <source_id keyed_name="Review Drafted Changes" type="Activity Template">66E01693619F43F98669276AF9518D62</source_id>
+       </Item>
+       <Item type="Activity Template Transition" id="F4813CA637914275892FB67807039FEB" action="add">
+        <controlled_itemtype keyed_name="Express DCO" type="ItemType" name="Express DCO">B678FAF40F7246A7925FB5B116988915</controlled_itemtype>
+        <event>on_activate</event>
+        <related_id keyed_name="34C5FDF020634A32A5DCF0879FCB30B7" type="Life Cycle Transition">34C5FDF020634A32A5DCF0879FCB30B7</related_id>
+        <sort_order>128</sort_order>
+        <source_id keyed_name="Review Drafted Changes" type="Activity Template">66E01693619F43F98669276AF9518D62</source_id>
+       </Item>
+       <Item type="Activity Template Transition" id="C448714F21C641978DD085BE178932BE" action="add">
+        <controlled_itemtype keyed_name="Express DCO" type="ItemType" name="Express DCO">B678FAF40F7246A7925FB5B116988915</controlled_itemtype>
+        <event>on_activate</event>
+        <related_id keyed_name="C1375C805899410BBF626AE3D98C9E75" type="Life Cycle Transition">C1375C805899410BBF626AE3D98C9E75</related_id>
+        <sort_order>256</sort_order>
+        <source_id keyed_name="Review Drafted Changes" type="Activity Template">66E01693619F43F98669276AF9518D62</source_id>
+       </Item>
+       <Item type="Workflow Map Path" id="05E74E5C9CFC412E882AFEE0837CD0F5" action="add">
+        <authentication>none</authentication>
+        <is_default>0</is_default>
+        <is_override>0</is_override>
+        <name>Approve</name>
+        <related_id>9D657F9AA18F4D46A027792F38E03E86</related_id>
+        <segments></segments>
+        <sort_order>128</sort_order>
+        <source_id keyed_name="Review Drafted Changes" type="Activity Template">66E01693619F43F98669276AF9518D62</source_id>
+        <x>-1</x>
+        <y>-1</y>
+       </Item>
+      </Relationships>
+     </Item>
+    </related_id>
+    <sort_order>384</sort_order>
+    <source_id keyed_name="Single Review  Express DCO" type="Workflow Map">4CBF4BB7BFAF41E1AE61C2558A45F1CB</source_id>
+   </Item>
+  
+   <Item type="Workflow Map Activity" id="C7ED266B68BF4348AAB23F52D2A08DE2" action="add">
+    <related_id keyed_name="Start" type="Activity Template">
+     <Item type="Activity Template" id="63AC2366B781458EA8AB6670BBEB35A3" action="add">
+      <can_delegate>0</can_delegate>
+      <can_refuse>0</can_refuse>
+      <consolidate_ondelegate>0</consolidate_ondelegate>
+      <icon>../images/Icons/16x16/16x16_arrow_right.gif</icon>
+      <is_auto>0</is_auto>
+      <is_end>0</is_end>
+      <is_start>1</is_start>
+      <label xml:lang="en">Start</label>
+      <managed_by_id keyed_name="Owner" type="Identity">538B300BB2A347F396C436E9EEE1976C</managed_by_id>
+      <message xml:lang="en">Workflow Start</message>
+      <name>Start</name>
+      <priority>2</priority>
+      <wait_for_all_inputs>0</wait_for_all_inputs>
+      <wait_for_all_votes>0</wait_for_all_votes>
+      <x>40</x>
+      <y>55</y>
+      <Relationships>
+       <Item type="Workflow Map Path" id="0E03E8FB6D624DA4BECB44A478367509" action="add">
+        <authentication>none</authentication>
+        <is_default>1</is_default>
+        <is_override>0</is_override>
+        <name>Start Work</name>
+        <related_id>66E01693619F43F98669276AF9518D62</related_id>
+        <sort_order>128</sort_order>
+        <source_id keyed_name="Start" type="Activity Template">63AC2366B781458EA8AB6670BBEB35A3</source_id>
+       </Item>
+      </Relationships>
+     </Item>
+    </related_id>
+    <sort_order>128</sort_order>
+    <source_id keyed_name="Single Review  Express DCO" type="Workflow Map">4CBF4BB7BFAF41E1AE61C2558A45F1CB</source_id>
+   </Item></Relationships>
+ </Item>
+</AML>

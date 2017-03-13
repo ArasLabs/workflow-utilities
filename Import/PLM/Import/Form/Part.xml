@@ -1,0 +1,56 @@
+﻿<AML>
+ <Item type="Form" id="CAF99D0A8E6E44E9A681C38015FACE91" action="add">
+  <Relationships>
+   <Item type="Body" id="83907DEF8B3044A08BDCBB77B1C0517E" action="add">
+    <source_id keyed_name="Part" type="Form">CAF99D0A8E6E44E9A681C38015FACE91</source_id>
+    <Relationships>
+     <Item type="Field" id="E48BE0C12A0A42CF8578FFD0250A3C95" action="add">
+      <bg_color>#FFFFFF</bg_color>
+      <border_width>0</border_width>
+      <field_type>item</field_type>
+      <font_color>#000000</font_color>
+      <font_family>arial, helvetica, sans-serif</font_family>
+      <font_size>8pt</font_size>
+      <font_weight>bold</font_weight>
+      <is_disabled>1</is_disabled>
+      <is_visible>1</is_visible>
+      <label xml:lang="en">Approver</label>
+      <label_position>top</label_position>
+      <list_no_blank>0</list_no_blank>
+      <name>approver_user_id</name>
+      <propertytype_id keyed_name="approver_user_id" type="Property">8E089812EED4485081A61975EB27C8DF</propertytype_id>
+      <sort_order>4992</sort_order>
+      <source_id keyed_name="83907DEF8B3044A08BDCBB77B1C0517E" type="Body">83907DEF8B3044A08BDCBB77B1C0517E</source_id>
+      <tab_index>98584</tab_index>
+      <tab_stop>1</tab_stop>
+      <x>420</x>
+      <y>245</y>
+     </Item>
+     <Item type="Field" id="9EFF0C11F83640FB8EDCB2620E5A6E1D" action="add">
+      <bg_color>#FFFFFF</bg_color>
+      <border_width>0</border_width>
+      <field_type>date</field_type>
+      <font_color>#000000</font_color>
+      <font_family>arial, helvetica, sans-serif</font_family>
+      <font_size>8pt</font_size>
+      <font_weight>bold</font_weight>
+      <is_disabled>1</is_disabled>
+      <is_visible>1</is_visible>
+      <label xml:lang="en">Last Approval Date</label>
+      <label_position>top</label_position>
+      <list_no_blank>0</list_no_blank>
+      <name>last_approval_date</name>
+      <propertytype_id keyed_name="last_approval_date" type="Property">E26B04BAB85E4F28A790A2897968CD84</propertytype_id>
+      <sort_order>5120</sort_order>
+      <source_id keyed_name="83907DEF8B3044A08BDCBB77B1C0517E" type="Body">83907DEF8B3044A08BDCBB77B1C0517E</source_id>
+      <tab_index>98712</tab_index>
+      <tab_stop>1</tab_stop>
+      <x>420</x>
+      <y>218</y>
+     </Item>
+
+    </Relationships>
+   </Item>
+  </Relationships>
+ </Item>
+ </AML>

@@ -1,0 +1,81 @@
+﻿<AML>
+ <Item type="Method" id="CF0DC59EB9914848A885E808B5089976" action="add">
+  <comments>sample method - clone and use youre own logic to reset data on new versions or copies of the item.</comments>
+  <execution_allowed_to keyed_name="World" type="Identity">A73B655731924CD0B027E4F4D5FCC0A9</execution_allowed_to>
+  <method_code><![CDATA[' Can be used with any itemType
+'
+' ATTENTION must be called from all 3 of these Server Events of the itemType:
+'    onBeforeAdd And onAfterVersion And onAfterCopy
+'
+' if the itemType has these properties they will be reset
+'
+'   approver_user_id (item)
+'   last_approval_date (date)
+'
+'MethodTemplateName=VBMain;
+Dim inn As Innovator = Me.getInnovator()
+Dim msg As String
+
+'===============
+Private Function fnResetDefinedItemProperties (ByRef updtItem As Item) As String
+
+  '## add properties to reset here
+  updtItem.setProperty("last_approval_date","")
+  updtItem.setProperty("approver_user_id","")
+
+  Return "OK"	
+End Function
+  
+'===============
+Function Main() As Item
+  'System.Diagnostics.Debugger.Break()
+
+  Dim thisAction As String = Me.getAttribute("action","")
+  Dim thisItemType As String = Me.GetType()
+
+  If (thisAction = "add") Then
+    ' process - onBeforeAdd Event
+    msg = fnResetDefinedItemProperties (Me)
+
+  Else
+    ' process - onAfterVersion, onAfterCopy Event
+    Dim newVerItem As Item = inn.newItem(thisItemType,"get")
+  
+    Dim thisItemConfigId As String = Me.getProperty("config_id")
+    Dim selProperties As String = "*"
+
+    ' Retrieve the id of the New version of thisItem
+    newVerItem.setAttribute("select",selProperties)
+    newVerItem.setProperty("config_id",thisItemConfigId)
+    newVerItem = newVerItem.apply()
+    If(newVerItem.getItemCount() <> 1) Then
+	  Return inn.newError("New version not found")
+    End If
+
+    Dim updtItem As Item = inn.newItem(thisItemType,"")
+    updtItem.setID(newVerItem.getID())
+
+    'check lock
+    Dim lockState As Integer = newVerItem.getLockStatus
+    If  lockState = 0 Then updtItem.setAction("edit")
+    If  lockState = 1 Then updtItem.setAction("update")
+    If  lockState < 0 Or lockState > 2= 1 Then
+      Return Me ' maybe add an error here
+    End If
+
+    msg = fnResetDefinedItemProperties (updtItem)
+
+    updtItem.setAttribute("serverEvents","0")
+    updtItem.setAttribute("version","0")
+    updtItem = updtItem.apply()
+
+End If
+
+
+  Return Me
+End Function
+]]></method_code>
+  <method_type>VB</method_type>
+  <name>Reset Item Props afterVersion</name>
+ </Item>
+</AML>

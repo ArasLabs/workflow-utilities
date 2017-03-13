@@ -27,13 +27,13 @@ Release notes/descriptions for the original project posted on the previous Aras 
 
 Release | Notes
 --------|--------
-[v1.0](https://github.com/ArasLabs/workflow-utilities/releases/tag/v1.0) | Workflow Utilities Packages and Documentation
+[v1.2](https://github.com/ArasLabs/workflow-utilities/releases/tag/v1.2) | Workflow Utilities Packages and Documentation
 
 #### Supported Aras Versions
 
 Project | Aras
 --------|------
-[v1.0](https://github.com/ArasLabs/workflow-utilities/releases/tag/v1.0) | Aras 9.3
+[v1.2](https://github.com/ArasLabs/workflow-utilities/releases/tag/v1.2) | Aras 9.3
 
 > ###### *Please note: Aras Community Projects are provided on an "as-is" basis.*
 

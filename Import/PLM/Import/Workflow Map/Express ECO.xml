@@ -1,0 +1,62 @@
+﻿<AML>
+ <Item type="Workflow Map" id="B0AB68FF8F014E379D17F0C1A426AD25" action="add">
+  <name>Express ECO</name>
+  <Relationships>
+  
+   <Item type="Workflow Map Activity" id="D73525C96EA34349BBEFA5BF74C12CB2" action="edit">
+    <related_id keyed_name="Draft Changes" type="Activity Template">
+     <Item type="Activity Template" id="1C62DA2A77BA4D78A30A4C41B9D2B4AE" action="edit">
+      <Relationships>
+       <Item type="Workflow Map Path" id="73BE566E1C934A509286AB2E4FDCC0E8" action="edit">
+        <name>Close Change</name>
+        <related_id>EF627C05C51140CDB6808DD543A88C60</related_id>
+        <source_id keyed_name="Draft Changes" type="Activity Template">1C62DA2A77BA4D78A30A4C41B9D2B4AE</source_id>
+        <Relationships>
+         <Item type="Workflow Map Path Post" id="3D40A63D8A33445AA3B6997D6660E1F8" action="merge">
+          <related_id keyed_name="Save WFdata to AffectedItems" type="Method">
+           <Item type="Method" action="get" select="id">
+            <name>Save WFdata to AffectedItems</name>
+           </Item>
+          </related_id>
+          <sequence>1</sequence>
+          <sort_order>128</sort_order>
+          <source_id keyed_name="73BE566E1C934A509286AB2E4FDCC0E8" type="Workflow Map Path">73BE566E1C934A509286AB2E4FDCC0E8</source_id>
+         </Item>
+        </Relationships>
+       </Item>
+      </Relationships>
+     </Item>
+    </related_id>
+    <source_id keyed_name="Express ECO" type="Workflow Map">B0AB68FF8F014E379D17F0C1A426AD25</source_id>
+   </Item>
+  
+    <Item type="Workflow Map Activity" id="C80C8FF002A64C10B0F3CBAB5B5A635C" action="add">
+    <related_id keyed_name="Change Review" type="Activity Template">
+     <Item type="Activity Template" id="519B14F681E8417D88CEB5C84C108C2A" action="add">
+      <Relationships>
+       <Item type="Workflow Map Path" id="6EC1361B8EB54719B5936100C27CB6AF" action="add">
+        <name>Approve Changes</name>
+        <source_id keyed_name="Change Review" type="Activity Template">519B14F681E8417D88CEB5C84C108C2A</source_id>
+        <Relationships>
+         <Item type="Workflow Map Path Post" id="D4290538A7CF4252B0CF3DD47524A4D7" action="add">
+          <related_id keyed_name="Save WFdata to AffectedItems" type="Method">
+           <Item type="Method" action="get" select="id">
+            <name>Save WFdata to AffectedItems</name>
+           </Item>
+          </related_id>
+          <sequence>1</sequence>
+          <sort_order>128</sort_order>
+          <source_id keyed_name="6EC1361B8EB54719B5936100C27CB6AF" type="Workflow Map Path">6EC1361B8EB54719B5936100C27CB6AF</source_id>
+         </Item>
+        </Relationships>
+       </Item>
+      </Relationships>
+     </Item>
+    </related_id>
+    <sort_order>640</sort_order>
+    <source_id keyed_name="Express ECO" type="Workflow Map">B0AB68FF8F014E379D17F0C1A426AD25</source_id>
+   </Item>
+ 
+  </Relationships>
+  </Item>
+</AML>

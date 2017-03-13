@@ -1,0 +1,20 @@
+﻿<AML>
+ <Item type="Life Cycle Map" id="D127DAF0C99247F4982A5733BD8300BB" action="edit">
+  <name>Express DCO</name>
+  <Relationships>
+   <Item type="Life Cycle Transition" id="34C5FDF020634A32A5DCF0879FCB30B7" action="add">
+    <from_state keyed_name="New" type="Life Cycle State">7F99A486678A4C258D39D0A2F1DA80DA</from_state>
+    <get_comment>0</get_comment>
+    <post_action keyed_name="CopyChangeOwnerToWorkflow" type="Method">
+     <Item type="Method" action="get" select="id">
+      <name>CopyChangeOwnerToWorkflow</name>
+     </Item>
+    </post_action>
+    <role keyed_name="Aras PLM" type="Identity">56A96DA9E981481688563E2D14D5D878</role>
+    <source_id keyed_name="Express DCO" type="Life Cycle Map">D127DAF0C99247F4982A5733BD8300BB</source_id>
+    <x>43</x>
+    <y>15</y>
+   </Item>
+  </Relationships>
+ </Item>
+</AML>
