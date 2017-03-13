@@ -1,0 +1,165 @@
+﻿<AML>
+ <Item type="Form" id="41449A928F3341149788B4A17F164845" action="add">
+  <category_form>0</category_form>
+  <height>250</height>
+  <stylesheet><![CDATA[../styles/default.css]]></stylesheet>
+  <width>800</width>
+  <name>Workflow Signoffs</name>
+  <Relationships>
+   <Item type="Body" id="0FBB54ABC54A47ABB211CE1F4E9A9AC3" action="add">
+    <css>BODY, HTML
+	{
+	  height:100%;
+	}</css>
+    <sort_order>128</sort_order>
+    <source_id keyed_name="Workflow Signoffs" type="Form">41449A928F3341149788B4A17F164845</source_id>
+    <Relationships>
+     <Item type="Field" id="7C6653CBD953451D9D63B6905FD5FE95" action="add">
+      <border_width>0</border_width>
+      <css>{$this field rule} .sys_f_border, {$this field rule} .sys_f_table, {$this field rule} .sys_f_value_container
+{
+	margin: 0px;
+	padding: 0px;
+}
+</css>
+      <display_length_unit>px</display_length_unit>
+      <field_type>html</field_type>
+      <font_color>#000000</font_color>
+      <font_family>arial, helvetica, sans-serif</font_family>
+      <font_size>8pt</font_size>
+      <font_weight>bold</font_weight>
+      <html_code><![CDATA[<script type="text/javascript">
+	window.addEventListener("load", onload_handler);
+	window.addEventListener("resize", expression_WorkflowSignoffs_setExpression);
+
+	var wfProcessId ="";
+	var Core_reportHTML = "<table/>";
+	function Core_loadProcessReport() {
+		if (!document.item || !document.item.xml) {
+			return;
+		}
+		var reportHTML;
+		if (document.item.getAttribute("action") == "add") {
+			reportHTML = aras.getResource("", "imports_core.no_workflow_signoffs_exist");
+		}
+		else {
+			var q = new aras.getMostTopWindowWithAras(window).Item("tmp", "tmp");
+			q.loadAML("<Item type='Workflow' action='get' select='related_id(*)'>" +
+						"<source_id>" + document.item.getAttribute("id") + "</source_id>" +
+						"<related_id condition='is not null'/>" +
+					"</Item>");
+			q = q.apply();
+			if (!q.isError()) {
+				var processItem = q.getItemByIndex(0).node.selectSingleNode("related_id/Item");
+				wfProcessId = q.getItemByIndex(0).getProperty("related_id","");
+				processItem.setAttribute("item_id_for_vote_now_link", document.item.getAttribute("id"));
+				var report = aras.getItemByKeyedName("Report", "Workflow Process History");
+				reportHTML = aras.runClientReport(report, "", processItem);
+				reportHTML = reportHTML.replace(/width=""/g, "");
+				reportHTML = reportHTML.replace(/height=""/g, "");
+			}
+			else {
+				reportHTML = q.getErrorDetail() + "<br>" + q.getErrorString() + "<br>" + q.getErrorSource();
+			}
+		}
+		Core_reportHTML = reportHTML;
+
+		var ifr = document.getElementById("result_iframe_frame");
+		var d = ifr.contentWindow.document.open();
+		d.write(reportHTML);
+		d.close();
+		ifr.style.visibility = "visible";
+	}
+
+	function expression_WorkflowSignoffs_setExpression() {
+		document.body.scroll = "no";
+		var field = document.getElementById("result_iframe_frame");
+		field.height = document.body.clientHeight - parseInt(toolbarContainer.style.height);
+		field.width = document.body.clientWidth;
+		toolbarContainer.style.width = document.body.clientWidth + "px";
+	}
+
+	function onload_handler() {
+		Core_loadProcessReport();
+		parent.document.getElementById("formFrame").style.overflow = "hidden";
+
+		clientControlsFactory.createControl("Aras.Client.Controls.Public.Toolbar", { id: "summary_toolbar", connectId: "toolbarContainer" }, function(control) {
+			toolbar = control;
+			clientControlsFactory.on(toolbar, {
+				"onClick": onClickItem
+			});
+			loadToolbar();
+			expression_WorkflowSignoffs_setExpression();
+		});
+	}
+	
+	function loadToolbar() {
+		toolbar.loadXml(aras.getI18NXMLResource("WorkflowSignoff_toolbar.xml"));
+		toolbar.show();
+	}
+
+	function onClickItem(item) {
+		var tbItemId = item._item_Experimental.id;
+		if (tbItemId.indexOf("showWorkflowProcess") >= 0) {
+			showWorkflowProcess();
+		}
+		else {
+			aras.saveString2File(function() { return Core_reportHTML; }, item.getId());
+		}
+	}
+
+	function showWorkflowProcess()
+	{
+	  if (wfProcessId !== "")
+	  {
+		top.aras.uiShowItem("Workflow Process", wfProcessId);
+	  }
+	}	
+	
+</script>
+<div id="toolbarContainer" style="height: 30px; width: 100%"></div>]]></html_code>
+      <is_disabled>0</is_disabled>
+      <is_visible>1</is_visible>
+      <label_position>right</label_position>
+      <list_no_blank>0</list_no_blank>
+      <positioning>absolute</positioning>
+      <sort_order>128</sort_order>
+      <source_id keyed_name="0FBB54ABC54A47ABB211CE1F4E9A9AC3" type="Body">0FBB54ABC54A47ABB211CE1F4E9A9AC3</source_id>
+      <tab_stop>1</tab_stop>
+      <x>0</x>
+      <y>0</y>
+      <name>calculate_html</name>
+     </Item>
+     <Item type="Field" id="61177853016A473EBB1F569D289DA554" action="add">
+      <border_width>0</border_width>
+      <css>{$this field rule} .sys_f_border, {$this field rule} .sys_f_table, {$this field rule} .sys_f_container, {$this field rule}
+{
+	width: 100%;
+	margin: 0px;
+	padding: 0px;
+}
+</css>
+      <display_length_unit>px</display_length_unit>
+      <field_type>html</field_type>
+      <font_color>#000000</font_color>
+      <font_family>arial, helvetica, sans-serif</font_family>
+      <font_size>8pt</font_size>
+      <font_weight>bold</font_weight>
+      <html_code><![CDATA[<iframe id="result_iframe_frame" frameborder="0" style="width: 100%;"></iframe>]]></html_code>
+      <is_disabled>0</is_disabled>
+      <is_visible>1</is_visible>
+      <label_position>right</label_position>
+      <list_no_blank>0</list_no_blank>
+      <positioning>absolute</positioning>
+      <sort_order>256</sort_order>
+      <source_id keyed_name="0FBB54ABC54A47ABB211CE1F4E9A9AC3" type="Body">0FBB54ABC54A47ABB211CE1F4E9A9AC3</source_id>
+      <tab_stop>1</tab_stop>
+      <x>0</x>
+      <y>30</y>
+      <name>result_iframe</name>
+     </Item>
+    </Relationships>
+   </Item>
+  </Relationships>
+ </Item>
+</AML>

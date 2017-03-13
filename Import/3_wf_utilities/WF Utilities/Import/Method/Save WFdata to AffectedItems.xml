@@ -1,0 +1,144 @@
+﻿<AML>
+ <Item type="Method" id="1885CC1C5FD5412F84191355FE9C66F9" action="add">
+  <comments>sample method - clone and use youre own logic to set data on Affected Items</comments>
+  <execution_allowed_to keyed_name="World" type="Identity">A73B655731924CD0B027E4F4D5FCC0A9</execution_allowed_to>
+  <method_code><![CDATA[// can be called from Workflow Paths/Activities
+// context item must be of type "Activity"
+// Assumes workflow controlled item uses standard Affected Item data model !!!
+//
+
+	// System.Diagnostics.Debugger.Break()
+	string thisId = this.getID();
+	string thisType = this.getType();
+	Item res;
+
+	//--- Get the workflow contolled item --- calling a generic method
+	Item qryItem = this.newItem(thisType,"Get WF Controlled Item");
+	qryItem.setID(thisId);
+	Item wfControlledItem = qryItem.apply();
+	if (wfControlledItem.isError()) {return wfControlledItem;}
+
+	// get all affected Items listed
+	Item affectedItems = fnGetAffectedItems (wfControlledItem);
+	if (affectedItems.getItemCount() >0) {
+		// for each affected item set data
+		for (int i=0; i<affectedItems.getItemCount(); i++) {
+			string affItemId = affectedItems.getItemByIndex(i).getProperty("new_item_id","");
+			// update data to newest version if affected item (referenced by "new_item_id")
+			if (affItemId != "") {
+				res = fnUpdateDataOnAffItem(wfControlledItem, affectedItems.getItemByIndex(i).getPropertyItem("new_item_id"));
+				if (res.isError()) {return res;}
+			}
+		}
+	}
+	
+	res = fnUpdateDataOnWfControlledItem (wfControlledItem);
+	if (res.isError()) {return res;}
+
+	return this;
+}
+
+// ==========================
+Item fnGetAffectedItems (Item wfCtrldItem) {
+	
+	string wfCtrldItemType = wfCtrldItem.getType();
+	string affItemRelType = "";
+
+	switch (wfCtrldItemType) {
+
+	case "Express ECO":
+	  affItemRelType = wfCtrldItemType + " Affected Item";
+	  break;
+	case "Express DCO":
+	  affItemRelType = wfCtrldItemType + " Affected Item";
+	  break;
+	case "ECN":
+	  affItemRelType = wfCtrldItemType + " Affected Item";
+	  break;
+	case "ECR":
+	  affItemRelType = wfCtrldItemType + " Affected Item";
+	  break;
+	case "Simple ECO":
+	  affItemRelType = wfCtrldItemType + " Affected Item";
+	  break;
+	}
+
+	string amlCmd = "<Item type='" + affItemRelType + "// action='get// select='id,related_id// serverEvents='0'>";
+	amlCmd = amlCmd + "<source_id>" + wfCtrldItem.getID() + "</source_id>";
+	amlCmd = amlCmd + "</Item>";
+	Item q = this.newItem("","");
+	q.loadAML(amlCmd);
+	Item res = q.apply();
+	if (res.isError()) {return res;}
+
+	if (res.getItemCount() > 0) {
+		List<string> idList = new List<string>();
+		for (int a=0; a<res.getItemCount(); a++) {
+			idList.Add(res.getItemByIndex(a).getProperty("related_id"));
+		}
+		amlCmd = "<Item type='Affected Item' action='get' serverEvents='0' ";
+		amlCmd = amlCmd + "select='new_item_id(last_approval_date,name,item_number,state,locked_by_id),sort_order'>";
+		amlCmd = amlCmd + "<id condition='in'>'"+string.Join("','",idList)+"'</id>";
+		amlCmd = amlCmd + "<new_item_id condition='is not null'/>";
+		amlCmd = amlCmd + "</Item>";
+		q = this.newItem("","");
+		q.loadAML(amlCmd);
+		res = q.apply();
+	}
+	return res;
+}
+
+// ==========================
+Item fnUpdateDataOnWfControlledItem (Item wfControlledItem) {
+  // run as Super User identity 
+  Aras.Server.Security.Identity plmIdentity = Aras.Server.Security.Identity.GetByName("Super User");
+  bool PermissionWasSet = Aras.Server.Security.Permissions.GrantIdentity(plmIdentity);
+
+  // ## add logic, if data on wf controlled item need to be set
+  //...
+  //...
+  //...
+  //...
+ 
+  // Revoke 'Aras PLM// permissions
+  if (PermissionWasSet) {Aras.Server.Security.Permissions.RevokeIdentity(plmIdentity);}
+
+  return this;
+}
+
+// ==========================
+Item fnUpdateDataOnAffItem (Item wfControlledItem,Item affectedItem) {
+  string wfOwner = wfControlledItem.getProperty("owned_by_id","");
+
+  Item updtItem = this.newItem(affectedItem.getType(),"");
+  updtItem.setAction("edit");
+  updtItem.setID(affectedItem.getID());
+  updtItem.setAttribute("serverEvents","0");
+  updtItem.setAttribute("version","0");
+
+  // set date to today and user to current user
+  string Now = DateTime.Now.ToString("yyyy-MM-dd");
+
+  // ## add properties to reset here
+  updtItem.setProperty("last_approval_date",Now);
+  updtItem.setProperty("approver_user_id",this.getInnovator().getUserID());
+
+  // run as Super User identity 
+  Aras.Server.Security.Identity plmIdentity = Aras.Server.Security.Identity.GetByName("Super User");
+  bool PermissionWasSet = Aras.Server.Security.Permissions.GrantIdentity(plmIdentity);
+
+  updtItem = updtItem.apply();
+
+  // Revoke 'Aras PLM// permissions
+  if (PermissionWasSet) {Aras.Server.Security.Permissions.RevokeIdentity(plmIdentity);}
+
+  return updtItem;
+}
+
+//--------------
+void EndOfModule () {
+]]></method_code>
+  <method_type>C#</method_type>
+  <name>Save WFdata to AffectedItems</name>
+ </Item>
+</AML>

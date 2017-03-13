@@ -1,0 +1,4 @@
+<imports>
+  <package name="WF Utilities" path="WF Utilities\Import" />
+  <package name="com.aras.innovator.core" path=".\" />
+</imports>

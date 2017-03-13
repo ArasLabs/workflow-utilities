@@ -1,0 +1,63 @@
+﻿<AML>
+ <Item type="Method" id="B3C2056612EF4339B5B8A4DF268E8AE5" action="add">
+  <comments>Updates managed_by_id on WF Process and all its related Activities</comments>
+  <execution_allowed_to keyed_name="Super User" type="Identity">6B14D33C4A7D41C188CCF2BC15BD01A3</execution_allowed_to>
+  <method_code><![CDATA[// must be run with Super User permissions !!!
+// the item context is expected to be of itemType = "Workflow Process"
+
+//System.Diagnostics.Debugger.Break();
+string thisId = this.getID();
+string thisType = this.getType();
+if (thisType != "Workflow Process") {return this;} //nothing to do
+
+string newManagedById = this.getProperty("managed_by_id","");
+if (newManagedById == "") {return this;}  //nothing to do
+
+Innovator inn = this.getInnovator();
+
+//' use SQL to update "Workflow Process" ManagedById
+string TN = "[Workflow_Process]";
+string SQLstr = "";
+SQLstr += "UPDATE " + TN;
+SQLstr += " SET " + TN + ".managed_by_id='" + newManagedById + "'";
+SQLstr += " WHERE " + TN + ".id='" + thisId + "'";
+Item res = inn.applySQL(SQLstr);
+if (res.isError()) {return res;}
+
+// use SQL to update the related "Workflow" item's ManagedById
+TN = "[Workflow]";
+SQLstr = "";
+SQLstr += "UPDATE " + TN;
+SQLstr += " SET " + TN + ".managed_by_id='" + newManagedById + "'";
+SQLstr += " WHERE " + TN + ".related_id='" + thisId + "'";
+res = inn.applySQL(SQLstr);
+if (res.isError()) {return res;}
+
+Item qry = this.newItem("Workflow Process Activity","get");
+qry.setAttribute("select","source_id,related_id(id,name,state,managed_by_id,locked_by_id)");
+qry.setProperty("source_id",thisId);
+qry = qry.apply();
+
+TN = "[Activity]";
+for (int i=0; i<qry.getItemCount(); i++) {
+	string activityId = qry.getItemByIndex(i).getProperty("related_id","");
+	if (activityId != "") {
+		Item actvityItem = qry.getItemByIndex(i).getPropertyItem("related_id");
+
+		if (actvityItem.getProperty("state","") != "Closed") {
+			//update each activity's managed_by_id via SQL  
+			SQLstr += "UPDATE " + TN;
+			SQLstr += " SET " + TN + ".managed_by_id='" + newManagedById + "'";
+			SQLstr += " WHERE " + TN + ".id='" + activityId + "'";
+			res = inn.applySQL(SQLstr);
+			if (res.isError()) {return res;}
+		}
+	}
+}
+
+return this;
+]]></method_code>
+  <method_type>C#</method_type>
+  <name>WorkflowProcess_UpdateManager</name>
+ </Item>
+</AML>

@@ -1,0 +1,79 @@
+﻿<AML>
+ <Item type="Method" id="CF0DC59EB9914848A885E808B5089976" action="add">
+  <comments>sample method - clone and use youre own logic to reset data on new versions or copies of the item.</comments>
+  <execution_allowed_to keyed_name="World" type="Identity">A73B655731924CD0B027E4F4D5FCC0A9</execution_allowed_to>
+  <method_code><![CDATA[// Can be used with any itemType
+//
+// ATTENTION must be called from all 3 of these Server Events of the itemType:
+//    onBeforeAdd And onAfterVersion And onAfterCopy
+//
+// if the itemType has these properties they will be reset in local function "fnResetDefinedItemProperties" ... add your own logic to do more ... 
+//
+//   approver_user_id (item)
+//   last_approval_date (date)
+//
+Innovator inn = this.getInnovator();
+string msg;
+//System.Diagnostics.Debugger.Break();
+
+  string thisAction = this.getAttribute("action","");
+  string thisItemType = this.getType();
+
+  if (thisAction == "add") {
+    // process - onBeforeAdd Event
+    msg = fnResetDefinedItemProperties (this);
+  }
+  else {
+    // process - onAfterVersion, onAfterCopy Event
+    Item newVerItem = inn.newItem(thisItemType,"get");
+  
+    string thisItemConfigId = this.getProperty("config_id");
+    string selProperties  = "*";
+
+    // Retrieve the id of the New version of thisItem
+    newVerItem.setAttribute("select",selProperties);
+    newVerItem.setProperty("config_id",thisItemConfigId);
+    newVerItem = newVerItem.apply();
+    if (newVerItem.getItemCount() != 1) {
+	  return inn.newError("New version not found");
+    }
+
+    Item updtItem = inn.newItem(thisItemType,"");
+    updtItem.setID(newVerItem.getID());
+
+    // check lock
+    int lockState = newVerItem.getLockStatus();
+    if (lockState == 0) {updtItem.setAction("edit");}
+    if (lockState == 1) {updtItem.setAction("update");}
+    if (lockState < 0 || lockState > 2) {
+      return this; // maybe add an error here
+    }
+
+    msg = fnResetDefinedItemProperties (updtItem);
+
+    updtItem.setAttribute("serverEvents","0");
+    updtItem.setAttribute("version","0");
+    updtItem = updtItem.apply();
+
+  }
+
+  return this;
+}
+
+// ===============
+string fnResetDefinedItemProperties (Item updtItem) {
+
+  // ## add properties to reset here ...
+  updtItem.setProperty("last_approval_date","");
+  updtItem.setProperty("approver_user_id","");
+
+  return "OK";
+}
+  
+//--------------
+void EndOfModule () {
+]]></method_code>
+  <method_type>C#</method_type>
+  <name>Reset Item Props afterVersion</name>
+ </Item>
+</AML>

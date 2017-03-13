@@ -1,0 +1,250 @@
+﻿<AML>
+ <Item type="Method" id="1ECA0D631ED947D0BFA35AA7307A70C3" action="add">
+  <comments>use with Workflow activity "onActivate" event</comments>
+  <execution_allowed_to keyed_name="World" type="Identity">A73B655731924CD0B027E4F4D5FCC0A9</execution_allowed_to>
+  <method_code><![CDATA[// NOTE:
+// this method only works if the Life Cycle Map "Workflow Process" has a 
+// transition from "Closed" to "Pending" for role "Aras PLM".
+// you must log on as "root" to add this transition 
+//
+// Clones defined activities to get "Pending" instance in the workflow process.
+// This is useful when using dynamic activity assignments. When looping back from an Activity,
+// the Activity to loop back from must be updatable by the WF owner to set assignments.
+// In state "Closed" updates are Not permitted. This is why this Activity should be cloned to add different assignments
+// before it is started again
+// 
+// Unfortunately this does not work on "post" path event of the workflow. which would make this code more generic.
+// The context in path events does not give information from which activitiy the path was started !!!
+// 
+// This is why a defined list of Activity names, this logic will be applied to, must be maintained.
+// You must enclose these names in single quotes '// and separate them by comma , !!!
+
+string activitiesToPromoteBackToPending = "'Team Review','Final Review'";
+
+	string thisId = this.getID();
+	string thisType = this.getType();
+	Item q;
+	Item res;
+
+	//System.Diagnostics.Debugger.Break();
+
+	if (thisType != "Activity") {return this;} //not called from Workflow Process, just exit
+
+	q = this.newItem("Workflow Process Activity","get");
+	q.setAttribute("select","source_id(name)");
+	q.setProperty("related_id",thisId);
+	res = q.apply();
+	if (res.isError()) {return res;}
+
+	string wfProcessId = res.getItemByIndex(0).getProperty("source_id","");
+
+	string amlCmd = "";
+	amlCmd += "<Item type='Workflow Process Activity// action='get// select='related_id(keyed_name,state,invalid)'>";
+	amlCmd += "	<source_id>" + wfProcessId + "</source_id>";
+	amlCmd += "	<related_id>";
+	amlCmd += "		<Item type='Activity'>";
+	amlCmd += "			<keyed_name condition='in'>" + activitiesToPromoteBackToPending +"</keyed_name>";
+	amlCmd += "		</Item>";
+	amlCmd += "	</related_id>";
+	amlCmd += "</Item>";
+	q = this.newItem("","");
+	q.loadAML(amlCmd);
+	res = q.apply();
+	if (res.isError()) {return res;}
+
+	for (int i=0;i<res.getItemCount(); i++) {
+		string fromActivity = res.getItemByIndex(i).getPropertyItem("related_id").getProperty("keyed_name","");
+		string fromActivityState = res.getItemByIndex(i).getPropertyItem("related_id").getProperty("state","");
+		string fromActivityId = res.getItemByIndex(i).getProperty("related_id","invalid");
+
+		if (fromActivityState == "Closed") {
+			// fetch the activity with relationship data
+		    amlCmd = "<Item type='Activity// action='get// select='*// id='" + fromActivityId + "'>";
+		    amlCmd += "<Relationships>";
+		    amlCmd += "  <Item type='Activity Assignment// action='get// select='*'/>";
+		    amlCmd += "  <Item type='Activity EMail// action='get// select='*'/>";
+		    amlCmd += "  <Item type='Activity Method// action='get// select='*'/>";
+		    amlCmd += "  <Item type='Activity Task// action='get// select='*'/>";
+		    amlCmd += "</Relationships>";
+		    amlCmd += "</Item>";
+		    q = this.newItem("","");
+		    q.loadAML(amlCmd);
+		    q = q.apply();
+		    if (q.isError()) {return q;}
+
+		    // clone the activity with (relationships)
+		    Item newActivity = addClonedActivity(q);
+			if (newActivity.isError()) {return newActivity;}
+
+		    string newActivityId = newActivity.getID();
+		    Item wfPaths;
+		    Item newWFpath;
+
+		    // get all wf process paths that go into "fromActivity" and that are not set to complete
+		    amlCmd = "<Item type='Workflow Process Path// action='get// select='*'>";
+		    amlCmd += "<is_complete condition='ne'>1</is_complete>";
+		    amlCmd += "<related_id>" + fromActivityId + "</related_id>";
+		    amlCmd += "</Item>";
+		    q = this.newItem("","");
+		    q.loadAML(amlCmd);
+		    wfPaths = q.apply();
+		    // loop and re-link related_id to newActivity's id
+		    for (int j=0;j<wfPaths.getItemCount(); j++) {
+		      newWFpath = this.newItem("Workflow Process Path","edit");
+		      newWFpath.setProperty("related_id",newActivityId);
+		      newWFpath.setAttribute("where","[WORKFLOW_PROCESS_PATH].id='" + wfPaths.getItemByIndex(j).getID() + "'");
+		      newWFpath = newWFpath.apply();
+			  if (newWFpath.isError()) {return newWFpath;}
+		    } 
+
+		    // get all wf process paths that go out from "fromActivity" and that are not set to complete
+		    amlCmd = "<Item type='Workflow Process Path// action='get// select='*'>";
+		    amlCmd += "<is_complete condition='ne'>1</is_complete>";
+		    amlCmd += "<source_id>" + fromActivityId + "</source_id>";
+		    amlCmd += "</Item>";
+		    q = this.newItem("","");
+		    q.loadAML(amlCmd);
+		    wfPaths = q.apply();
+		    // loop and re-link related_id to newActivity's id
+		    for (int j=0; j<wfPaths.getItemCount(); j++) {
+		      
+		      // if path is to thisActivity (context), then force the link (source id) to come from newActivity, ...
+		      if ((wfPaths.getItemByIndex(j).getProperty("source_id","") == fromActivityId) && (wfPaths.getItemByIndex(j).getProperty("related_id","") == thisId)) {
+			         string SQLstr = "UPDATE [WORKFLOW_PROCESS_PATH]" + " SET [WORKFLOW_PROCESS_PATH].source_id='" + newActivityId + "'";
+			         SQLstr += " WHERE [WORKFLOW_PROCESS_PATH].id = '" + wfPaths.getItemByIndex(j).getID()  + "'";
+			         q = this.getInnovator().applySQL(SQLstr);
+					 if (q.isError()) {return q;}
+			  }
+		      else { // set path to complete and clone new paths
+			      if (wfPaths.getItemByIndex(j).getPropertyItem("related_id").getProperty("keyed_name") != this.getProperty("keyed_name")) {
+					newWFpath = this.newItem("Workflow Process Path","edit");
+					newWFpath.setProperty("is_complete","1");
+					newWFpath.setAttribute("where","[WORKFLOW_PROCESS_PATH].id='" + wfPaths.getItemByIndex(j).getID() + "'");
+					newWFpath = newWFpath.apply();
+					if (newWFpath.isError()) {return newWFpath;}
+
+					// create new path from new activtiy that is not complete             
+					newWFpath = wfPaths.getItemByIndex(j).clone(false);
+					newWFpath.setProperty("source_id",newActivityId);
+					newWFpath.setProperty("is_complete","0");
+					newWFpath = newWFpath.apply();
+					if (newWFpath.isError()) {return newWFpath;}
+			      }
+		      }
+			} 
+
+		    // add newActivity to workflow process (relationship)
+		    amlCmd = "<Item type='Workflow Process Activity// action='add// >";
+		    amlCmd += "<source_id>" + wfProcessId + "</source_id>";
+		    amlCmd += "<related_id>" + newActivity.getID() + "</related_id>";
+		    amlCmd += "</Item>";
+		    q = this.newItem("","");
+		    q.loadAML(amlCmd);
+		    q = q.apply();
+		    if (q.isError()) {return q;}
+		}
+	}
+	return this;
+}
+
+//--------
+Item addClonedActivity(Item fromItem) {
+  // NOTE: simple .clone() method or 'add// action does not work !
+  // throws an error because ItemType 'Activity// is defined as "dependent" item
+  // The workaround is to force an insert via SQL.
+   
+  string TN = "[ACTIVITY]";
+  string newActivityId = this.getInnovator().getNewID();
+
+  DateTime dtNow = System.DateTime.UtcNow;
+  string tmpPtrn = "yyyyMMdd HH:mm:ss";
+  string tmpDt = dtNow.ToString(tmpPtrn, DateTimeFormatInfo.InvariantInfo);
+  
+  string SQLstr = "INSERT INTO " + TN + "(id,config_id,name,keyed_name,not_lockable,major_rev,generation,new_version,is_released,is_current,icon,state,current_state,permission_id,created_by_id,created_on) VALUES (";
+  SQLstr += "'" + newActivityId + "'";
+  SQLstr += ",'" + newActivityId + "'";
+  SQLstr += ",'" + fromItem.getProperty("name","") + "'";
+  SQLstr += ",'" + fromItem.getProperty("keyed_name","") + "'";
+  SQLstr += ",'" + fromItem.getProperty("not_lockable","") + "'";
+  SQLstr += ",'" + fromItem.getProperty("major_rev","") + "'";
+  SQLstr += ",1";
+  SQLstr += ",'" + fromItem.getProperty("new_version","") + "'";
+  SQLstr += ",'" + fromItem.getProperty("is_released","") + "'";
+  SQLstr += ",'" + fromItem.getProperty("is_current","") + "'";
+  SQLstr += ",'" + fromItem.getProperty("icon","") + "'";
+  SQLstr += ",'Pending'";
+  SQLstr += ",'E1873699A2DA4E709A8C91501449B623'";  //ID of state "Pending" of Life Cycle Map "Workflow Process"
+  SQLstr += ",'5849EC51A7604BCE976563F718B9E0FF'";  //Permission ID of "Workflow Process"
+  SQLstr += ",'" + this.getInnovator().getUserID() + "'";
+  SQLstr += ",'" + tmpDt + "'";
+  SQLstr += ")";
+  Item newActivity = this.getInnovator().applySQL(SQLstr);
+  if (newActivity.isError()) {return newActivity;}
+
+  // update the fromActivity's "cloned_as" property
+  SQLstr = "UPDATE " + TN + " SET " + TN + ".cloned_as='" + newActivityId + "'";
+  SQLstr += " WHERE " + TN + ".id='" + fromItem.getID()  + "'";
+  newActivity = this.getInnovator().applySQL(SQLstr);
+  if (newActivity.isError()) {return newActivity;}
+
+  //clone defined relationships of fromActivity
+  Item newRel;
+  Item relshipItems = fromItem.getRelationships("Activity Assignment");
+  for (int i=0;i<relshipItems.getItemCount();i++) {
+  	newRel = relshipItems.getItemByIndex(i).clone(false);
+
+  	newRel.removeProperty("closed_on");
+  	newRel.removeProperty("closed_by");
+  	newRel.removeProperty("is_overdue");
+  	newRel.removeProperty("comments");
+  	newRel.removeProperty("reminders_sent");
+  	newRel.removeProperty("claimed_by");
+  	newRel.removeProperty("path");
+
+  	newRel.setProperty("source_id",newActivityId);
+  	newRel = newRel.apply();
+    if (newRel.isError()) {return newRel;}
+  }  
+  relshipItems = fromItem.getRelationships("Activity EMail");
+  for (int i=0; i<relshipItems.getItemCount();i++) {
+  	newRel = relshipItems.getItemByIndex(i).clone(false);
+  	newRel.setProperty("source_id",newActivityId);
+  	newRel = newRel.apply();
+    if (newRel.isError()) {return newRel;}
+  }  
+  relshipItems = fromItem.getRelationships("Method");
+  for (int i=0;i<relshipItems.getItemCount();i++) {
+  	newRel = relshipItems.getItemByIndex(i).clone(false);
+  	newRel.setProperty("source_id",newActivityId);
+  	newRel = newRel.apply();
+    if (newRel.isError()) {return newRel;}
+  } 
+  relshipItems = fromItem.getRelationships("Task");
+  for (int i=0; i<relshipItems.getItemCount();i++) {
+  	newRel = relshipItems.getItemByIndex(i).clone(false);
+  	newRel.setProperty("source_id",newActivityId);
+  	newRel = newRel.apply();
+    if (newRel.isError()) {return newRel;}
+  }  
+
+  // udpate more props on newActivity
+ string[] propsToClone = {"major_rev","timeout_duration","message","reminder_count","is_escalated","escalate_to","subflow","can_refuse","can_delegate","consolidate_ondelegate","reminder_interval","is_auto","x","y","label","wait_for_all_votes","wait_for_all_inputs","role","is_end","is_start","priority","expected_duration","managed_by_id","owned_by_id","team_id"  };
+  
+  newActivity = this.newItem("Activity","edit");
+  newActivity.setID(newActivityId);
+  for (int i=0; i<propsToClone.Length; i++) {
+    // ##multi language logic to some props needs to be added in the future
+    newActivity.setProperty(propsToClone[i], fromItem.getProperty(propsToClone[i],""));
+  }  
+  newActivity = newActivity.apply();
+  
+  return newActivity;
+}
+
+//--------------
+void EndOfModule () {
+]]></method_code>
+  <method_type>C#</method_type>
+  <name>Clone WorkflowActivityToPending</name>
+ </Item>
+</AML>

@@ -1,0 +1,20 @@
+﻿<AML>
+ <Item type="Life Cycle Map" id="BD1529204922428C997E86B3BDEA4646" action="add">
+  <description>Workflow Instance</description>
+  <name>Workflow Process</name>
+  <start_state keyed_name="Pending" type="Life Cycle State">E1873699A2DA4E709A8C91501449B623</start_state>
+  <Relationships>
+   <Item type="Life Cycle Transition" id="08779C8A0E7442F4B784CFCA5678E256" action="add">
+    <from_state keyed_name="Closed" type="Life Cycle State">46672469D8964E699F24F2AA243FF5B3</from_state>
+    <get_comment>0</get_comment>
+    <role keyed_name="Aras PLM" type="Identity">56A96DA9E981481688563E2D14D5D878</role>
+    <segments>254,8</segments>
+    <sort_order>256</sort_order>
+    <source_id keyed_name="Workflow Process" type="Life Cycle Map">BD1529204922428C997E86B3BDEA4646</source_id>
+    <to_state keyed_name="Pending" type="Life Cycle State">E1873699A2DA4E709A8C91501449B623</to_state>
+    <x>-46</x>
+    <y>-18</y>
+   </Item>
+  </Relationships>
+ </Item>
+</AML>
