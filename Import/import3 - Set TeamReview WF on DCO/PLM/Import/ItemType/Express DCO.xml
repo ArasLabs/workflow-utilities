@@ -1,0 +1,13 @@
+﻿<AML>
+ <Item type="ItemType" id="B678FAF40F7246A7925FB5B116988915" action="add">
+  <name>Express DCO</name>
+  <Relationships>
+   <Item type="Allowed Workflow" id="3C769FF2567E45D69F89E24144EAAD2A" action="add">
+    <is_default>1</is_default>
+    <related_id keyed_name="Express Team DCO" type="Workflow Map">94E9141E761F42308E3393C7014A8D50</related_id>
+    <sort_order>128</sort_order>
+    <source_id keyed_name="Express DCO" type="ItemType" name="Express DCO">B678FAF40F7246A7925FB5B116988915</source_id>
+   </Item>
+  </Relationships>
+ </Item>
+</AML>

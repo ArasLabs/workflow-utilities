@@ -1,0 +1,299 @@
+﻿<AML>
+ <Item type="Method" id="1ECA0D631ED947D0BFA35AA7307A70C3" action="add">
+  <comments>use with Workflow activity "onActivate" event</comments>
+  <execution_allowed_to keyed_name="World" type="Identity">A73B655731924CD0B027E4F4D5FCC0A9</execution_allowed_to>
+  <method_code><![CDATA['MethodTemplateName=VBMain;
+'
+' NOTE:
+' this method only works if the Life Cycle Map "Workflow Process" has a 
+' transition from "Closed" to "Pending" for role "Aras PLM".
+' you must log on as "root" to add this transition 
+'
+' Clones defined activities to get "Pending" instance in the workflow process.
+' This is useful when using dynamic activity assignments. When looping back from an Activity,
+' the Activity to loop back from must be updatable by the WF owner to set assignments.
+' In state "Closed" updates are Not permitted. This is why this Activity should be cloned to add different assignments
+' before it is started again
+' 
+' Unfortunately this does not work on "post" path event of the workflow. which would make this code more generic.
+' The context in path events does not give information from which activitiy the path was started !!!
+' 
+' This is why a defined list of Activity names, this logic will be applied to, must be maintained.
+' You must enclose these names in single quotes '' and separate them by comma , !!!
+
+Dim activitiesToPromoteBackToPending As String = "'Team Review','Final Review'"
+
+Dim inn As Innovator = Me.getInnovator()
+Function Main() As Item
+	
+
+	Dim thisId As String = Me.GetID()
+	Dim thisType As String = Me.GetType()
+	Dim q As item
+	Dim res As item
+	
+
+	'System.Diagnostics.Debugger.Break()
+	
+
+	If thisType <> "Activity" Then Return Me 'not called from Workflow Process, just exit
+	
+
+	q = Me.newItem("Workflow Process Activity","get")
+	q.setAttribute("select","source_id(name)")
+	q.setProperty("related_id",thisId)
+	res = q.apply()
+	If res.isError() Then Return res
+	
+
+	Dim wfProcessId As String = res.getItembyIndex(0).getProperty("source_id","")
+
+	Dim amlCmd As String = ""
+	amlCmd = amlCmd & "<Item type='Workflow Process Activity' action='get' select='related_id(keyed_name,state,invalid)'>"
+	amlCmd = amlCmd & "	<source_id>" + wfProcessId + "</source_id>"
+	amlCmd = amlCmd & "	<related_id>"
+	amlCmd = amlCmd & "		<Item type='Activity'>"
+	amlCmd = amlCmd & "			<keyed_name condition='in'>" + activitiesToPromoteBackToPending +"</keyed_name>"
+	amlCmd = amlCmd & "		</Item>"
+	amlCmd = amlCmd & "	</related_id>"
+	amlCmd = amlCmd & "</Item>"
+	q = Me.newItem("","")
+	q.loadAML(amlCmd)
+	res = q.apply()
+	If res.isError() Then Return res
+	
+
+	Dim i As Integer
+	For i=0 To res.getItemCount()-1
+		Dim fromActivity As String = res.getItemByIndex(i).getPropertyItem("related_id").getProperty("keyed_name","")
+		Dim fromActivityState As String = res.getItemByIndex(i).getPropertyItem("related_id").getProperty("state","")
+		Dim fromActivityId As String = res.getItemByIndex(i).getProperty("related_id","invalid")
+		
+
+		If fromActivityState = "Closed" Then
+			' fetch the activity with relationship data
+		    amlCmd = "<Item type='Activity' action='get' select='*' id='" & fromActivityId & "'>"
+		    amlCmd = amlCmd & "<Relationships>"
+		    amlCmd = amlCmd & "  <Item type='Activity Assignment' action='get' select='*'/>"
+		    amlCmd = amlCmd & "  <Item type='Activity EMail' action='get' select='*'/>"
+		    amlCmd = amlCmd & "  <Item type='Activity Method' action='get' select='*'/>"
+		    amlCmd = amlCmd & "  <Item type='Activity Task' action='get' select='*'/>"
+		    amlCmd = amlCmd & "</Relationships>"
+		    amlCmd = amlCmd & "</Item>"
+		    q = Me.newItem("","")
+		    q.loadAML(amlCmd)
+		    q = q.apply()
+		    If q.isError() Then Return q
+		    
+
+		    'clone the activity with (relationships)
+		    Dim newActivity As Item = addClonedActivity(q)
+		    If newActivity.isError() Then Return newActivity
+		
+
+		    Dim newActivityId As String = newActivity.getID()
+		    Dim wfPaths As Item
+		    Dim newWFpath As Item
+		    Dim j As Integer
+		    Dim relIDs As String = "<empty>"
+		
+
+		    ' get all wf process paths that go into "fromActivity" and that are not set to complete
+		    amlCmd = "<Item type='Workflow Process Path' action='get' select='*'>"
+		    amlCmd = amlCmd & "<is_complete condition='ne'>1</is_complete>"
+		    amlCmd = amlCmd & "<related_id>" & fromActivityId & "</related_id>"
+		    amlCmd = amlCmd & "</Item>"
+		    q = Me.newItem("","")
+		    q.loadAML(amlCmd)
+		    wfPaths = q.apply()
+		    ' loop and re-link related_id to newActivity's id
+		    For j=0 To wfPaths.getItemCount()-1
+		      newWFpath = Me.newItem("Workflow Process Path","edit")
+		      newWFpath.setProperty("related_id",newActivityId)
+		      newWFpath.setAttribute("where","[WORKFLOW_PROCESS_PATH].id='" & wfPaths.getItemByIndex(j).getID() & "'")
+		      newWFpath = newWFpath.apply()
+		      If newWFpath.isError() Then Return newWFpath
+		    Next j 
+		
+
+		    ' get all wf process paths that go out from "fromActivity" and that are not set to complete
+		    amlCmd = "<Item type='Workflow Process Path' action='get' select='*'>"
+		    'amlCmd = amlCmd & "<is_complete condition='ne'>1</is_complete>"
+		    amlCmd = amlCmd & "<source_id>" & fromActivityId & "</source_id>"
+		    amlCmd = amlCmd & "</Item>"
+		    q = Me.newItem("","")
+		    q.loadAML(amlCmd)
+		    wfPaths = q.apply()
+		    ' loop and re-link related_id to newActivity's id
+		    For j=0 To wfPaths.getItemCount()-1
+		      
+		      ' if path is to thisActivity (context), then force the link (source id) to come from newActivity, ...
+		      If wfPaths.getItemByIndex(j).getProperty("source_id","") = fromActivityId And wfPaths.getItemByIndex(j).getProperty("related_id","") = thisId Then
+			         Dim SQLstr As String = "UPDATE [WORKFLOW_PROCESS_PATH]" & " SET [WORKFLOW_PROCESS_PATH].source_id='" & newActivityId & "'"
+			         SQLstr = SQLstr & " WHERE [WORKFLOW_PROCESS_PATH].id = '" & wfPaths.getItemByIndex(j).getID()  & "'"
+			         q = inn.applySQL(SQLstr)
+			         If q.isError() Then Return q
+
+		      Else ' set path to complete and clone new paths
+			      If (wfPaths.getItemByIndex(j).getPropertyItem("related_id").getProperty("keyed_name") <> Me.getProperty("keyed_name")) Then
+					newWFpath = Me.newItem("Workflow Process Path","edit")
+					newWFpath.setProperty("is_complete","1")
+					newWFpath.setAttribute("where","[WORKFLOW_PROCESS_PATH].id='" & wfPaths.getItemByIndex(j).getID() & "'")
+					newWFpath = newWFpath.apply()
+					If newWFpath.isError() Then Return newWFpath
+					
+
+					' create new path from new activtiy that is not complete             
+					newWFpath = wfPaths.getItemByIndex(j).clone(False)
+					newWFpath.setProperty("source_id",newActivityId)
+					newWFpath.setProperty("is_complete","0")
+					newWFpath = newWFpath.apply()
+					If newWFpath.isError() Then Return newWFpath
+			      End If
+		        
+		      End If
+		    Next j 
+		
+
+		    'add newActivity to workflow process (relationship)
+		    amlCmd = "<Item type='Workflow Process Activity' action='add' >"
+		    amlCmd = amlCmd & "<source_id>" & wfProcessId & "</source_id>"
+		    amlCmd = amlCmd & "<related_id>" & newActivity.getID() & "</related_id>"
+		    amlCmd = amlCmd & "</Item>"
+		    q = Me.newItem("","")
+		    q.loadAML(amlCmd)
+		    q = q.apply()
+		    If q.isError() Then Return q
+		
+
+		End If
+	Next i
+		
+
+	Return Me
+End Function
+
+'--------
+Private Function addClonedActivity(ByRef fromItem As Item) As Item 
+  'NOTE: simple .clone() method or 'add' action does not work !
+  'throws an error because ItemType 'Activity' is defined as "dependent" item
+  'The workaround is to force an insert via SQL.
+   
+  Dim TN As String = "[ACTIVITY]"
+  Dim newActivityId As String = inn.getNewID()
+
+  Dim dtNow As DateTime = System.DateTime.UtcNow
+  Dim tmpPtrn As String = "yyyyMMdd HH:mm:ss"
+  Dim tmpDt As String = dtNow.toString(tmpPtrn, DateTimeFormatInfo.InvariantInfo)
+  
+  Dim SQLstr As String = "INSERT INTO " & TN & " (id,config_id,name,keyed_name,not_lockable,major_rev,generation,new_version,is_released,is_current,icon,state,current_state,permission_id,created_by_id,created_on) VALUES ("
+  SQLstr = SQLstr & "'" & newActivityId & "'"
+  SQLstr = SQLstr & ",'" & newActivityId & "'"
+  SQLstr = SQLstr & ",'" & fromItem.getProperty("name","") & "'"
+  SQLstr = SQLstr & ",'" & fromItem.getProperty("keyed_name","") & "'"
+  SQLstr = SQLstr & ",'" & fromItem.getProperty("not_lockable","") & "'"
+  SQLstr = SQLstr & ",'" & fromItem.getProperty("major_rev","") & "'"
+  SQLstr = SQLstr & ",1"
+  SQLstr = SQLstr & ",'" & fromItem.getProperty("new_version","") & "'"
+  SQLstr = SQLstr & ",'" & fromItem.getProperty("is_released","") & "'"
+  SQLstr = SQLstr & ",'" & fromItem.getProperty("is_current","") & "'"
+  SQLstr = SQLstr & ",'" & fromItem.getProperty("icon","") & "'"
+  SQLstr = SQLstr & ",'Pending'"
+  SQLstr = SQLstr & ",'E1873699A2DA4E709A8C91501449B623'"  'ID of state "Pending" of Life Cycle Map "Workflow Process"
+  SQLstr = SQLstr & ",'5849EC51A7604BCE976563F718B9E0FF'"  'Permission ID of "Workflow Process"
+  SQLstr = SQLstr & ",'" & inn.getUserID() & "'"
+  SQLstr = SQLstr & ",'" & tmpDt & "'"
+  SQLstr = SQLstr & ")"
+  Dim newActivity As Item = inn.applySQL(SQLstr)
+  If newActivity.isError() Then Return newActivity
+
+  'update the fromActivity's "cloned_as" property
+  SQLstr = "UPDATE " & TN & " SET " & TN & ".cloned_as='" & newActivityId & "'"
+  SQLstr = SQLstr & " WHERE " & TN & ".id='" & fromItem.getID()  & "'"
+  newActivity = inn.applySQL(SQLstr)
+  If newActivity.isError() Then Return newActivity
+
+  'clone defined relationships of fromActivity
+  Dim newRel As Item
+  Dim relshipItems As Item = fromItem.getRelationships("Activity Assignment")
+  Dim i As Integer
+  For i=0 To relshipItems.getItemCount() -1
+  	newRel = relshipItems.getItemByIndex(i).clone(False)
+
+  	newRel.removeProperty("closed_on")
+  	newRel.removeProperty("closed_by")
+  	newRel.removeProperty("is_overdue")
+  	newRel.removeProperty("comments")
+  	newRel.removeProperty("reminders_sent")
+  	newRel.removeProperty("claimed_by")
+  	newRel.removeProperty("path")
+
+  	newRel.setProperty("source_id",newActivityId)
+  	newRel = newRel.apply()
+    If newRel.isError() Then Return newRel
+  Next i  
+  relshipItems = fromItem.getRelationships("Activity EMail")
+  For i=0 To relshipItems.getItemCount() -1
+  	newRel = relshipItems.getItemByIndex(i).clone(False)
+  	newRel.setProperty("source_id",newActivityId)
+  	newRel = newRel.apply()
+    If newRel.isError() Then Return newRel
+  Next i  
+  relshipItems = fromItem.getRelationships("Method")
+  For i=0 To relshipItems.getItemCount() -1
+  	newRel = relshipItems.getItemByIndex(i).clone(False)
+  	newRel.setProperty("source_id",newActivityId)
+  	newRel = newRel.apply()
+    If newRel.isError() Then Return newRel
+  Next i  
+  relshipItems = fromItem.getRelationships("Task")
+  For i=0 To relshipItems.getItemCount() -1
+  	newRel = relshipItems.getItemByIndex(i).clone(False)
+  	newRel.setProperty("source_id",newActivityId)
+  	newRel = newRel.apply()
+    If newRel.isError() Then Return newRel
+  Next i  
+
+  'udpate more props on newActivity
+  Dim propsToClone As String() = { _
+    "major_rev", _
+    "timeout_duration", _
+    "message", _
+    "reminder_count", _
+    "is_escalated", _
+    "escalate_to", _
+    "subflow", _
+    "can_refuse", _
+    "can_delegate", _
+    "consolidate_ondelegate", _
+    "reminder_interval", _
+    "is_auto", _
+    "x","y", _
+    "label", _
+    "wait_for_all_votes", _
+    "wait_for_all_inputs", _
+    "role", _
+    "is_end", _
+    "is_start", _
+    "priority", _
+    "expected_duration", _
+    "managed_by_id", _
+    "owned_by_id", _
+    "team_id" _
+  }
+  
+  newActivity = Me.newItem("Activity","edit")
+  newActivity.SetID(newActivityId)
+  For i=0 To propsToClone.Length -1
+    '##multi language logic to some props needs to be added in the future
+    newActivity.setProperty(propsToClone(i), fromItem.getProperty(propsToClone(i),""))
+  Next i  
+  newActivity = newActivity.apply()
+  
+  Return newActivity
+End Function
+]]></method_code>
+  <method_type>VB</method_type>
+  <name>Clone WorkflowActivityToPending</name>
+ </Item>
+</AML>

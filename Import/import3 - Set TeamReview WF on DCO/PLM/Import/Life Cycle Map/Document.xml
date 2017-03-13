@@ -1,0 +1,18 @@
+﻿<AML>
+ <Item type="Life Cycle Map" id="3B1C099A970A4E51940CBAE76FF67A7D" action="add">
+  <name>Document</name>
+  <Relationships>
+   <Item type="Life Cycle Transition" id="E6B197B5A7E84E54BDA472E207673FBA" action="add">
+    <from_state keyed_name="In Review" type="Life Cycle State">8242F1E396B24FB78CFCA296A04DDF69</from_state>
+    <get_comment>0</get_comment>
+    <role keyed_name="Aras PLM" type="Identity">56A96DA9E981481688563E2D14D5D878</role>
+    <segments>164,35</segments>
+    <sort_order>1792</sort_order>
+    <source_id keyed_name="Document" type="Life Cycle Map">3B1C099A970A4E51940CBAE76FF67A7D</source_id>
+    <to_state keyed_name="Preliminary" type="Life Cycle State">7E2824158A364D83B137117911BA87B3</to_state>
+    <x>-59</x>
+    <y>-110</y>
+   </Item>
+  </Relationships>
+ </Item>
+</AML>

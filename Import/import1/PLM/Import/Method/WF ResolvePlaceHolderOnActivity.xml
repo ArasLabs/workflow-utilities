@@ -1,0 +1,330 @@
+﻿<AML>
+ <Item type="Method" id="2E11832393A745CD89312B76D9FF823A" action="add">
+  <comments>use with Server Event 'onAssign' on WF Activities</comments>
+  <execution_allowed_to keyed_name="World" type="Identity">A73B655731924CD0B027E4F4D5FCC0A9</execution_allowed_to>
+  <method_code><![CDATA[// C#
+//Method: WF ResolvePlaceHolderOnActivity
+//
+// Can be called from work flow activity's server event 'OnAssin' on any 'assignment' on Workflow Maps.
+// Assumes you create place holder identities with special naming and use them for work flow acitivy assignments.
+// Whereever you use a place holder identity ${<name>} you must add this method to the server event of this WF activity.
+//
+// NOTE: You must add a property "place_holder_resolution_rule" of type 'string  size=128' to itemType 'Identity'
+//       you mut log on as 'root' to do so !!!) - make the property 'hidden' on grids and add it to form 'Identity For Admins' only
+//       Place holder identities do not need to have Members configured.
+//
+// RULES:
+//  The logic will look at the list of assignees of the activity this method gets started from.
+//  There it will look for identitity names with special notation (format)
+//  Any identity starting with "${"  it will treat as a place holder and try to resolve it.
+//  The rules how to resolve are expected in the identity’s "description" field (increase lentgth to 100).
+//  The result of the rules resolution is one or more identity_ids to be used instead of the place holder.
+//  If an identity is already listed, but would also be added again by a resolved identity the following precedence rules apply:
+//     no duplicate identities will be added !
+//     if the existing identity has flag "required" set,  it stays
+//     if the existing identity has flag "required" NOT set and the resolved identity has the flag set, the flag will be set on the existing,
+//     voting weight, for_all_members_flag, escalate_to settings of exisitng identities will always stay
+//     voting weight setting on place holder identity will be used for resolved identity
+//     for_all_members_flag, escalate_to settings on place holder will be ignored for resolved identity
+ 
+// The place holder identity will be removed from the Activity and the new 'resolved' identities will be added.
+
+//  These Rules define where to find a property of type "Item" with Data Source "Identity"
+//
+//   Option1:  thisItem@<wf controlled item>@<property name>
+//             Example: "Simple ECO" has a property (type Item) "management_CRB_id"
+//             The place holder identity's name could be: ${ECO Mgmt CRB}
+//             The place holder identity's rule ==> thisItem@Simple ECO@management_CRB_id
+//
+//   Option2:  relList@<wf controlled item>@<relationship name>@<rel property name>
+//             Example: "Simple ECO" has a relationship "Simple ECO Approvers" with a property (type Item) "approver_id"
+//             The place holder identity's name could be: ${Simple ECO Approvers}
+//             The place holder identity's rule ==> relList@Simple ECO@Simple ECO Approvers@approver_id
+//
+//   Option3:  relListItem@<wf controlled item>@<relationship name>@<related_property>@<property name>
+//             Example: "PR" has a (NULL) relationship "PR Affected Item". There the property that links to a 
+//             an item is "affected_item_id". You now want to get to the "owned_by_id" of all items listed.
+//             The place holder identity's name could be: ${PR Affected Item Owners}
+//             The place holder identity's rule ==> relListItem@PR@PR Affected Item@affected_item_id@owned_by_id
+
+Innovator inn = this.getInnovator();
+string thisType = this.getAttribute("type");
+string thisActivityId = this.getAttribute("id");
+string thisActivityName = this.getProperty("name","");
+
+//System.Diagnostics.Debugger.Break(); 
+
+// Grant 'Aras PLM' permissions
+Aras.Server.Security.Identity plmIdentity = Aras.Server.Security.Identity.GetByName("Super User");
+bool PermissionWasSet  = Aras.Server.Security.Permissions.GrantIdentity(plmIdentity);
+
+//checks
+//get list of assignments of this activity
+Item assignments = this.newItem("Activity Assignment","get");
+assignments.setProperty("source_id", thisActivityId);
+assignments.setAttribute("select", "is_required,voting_weight, for_all_members, related_id(id,name,description,place_holder_resolution_rule)") ;
+assignments = assignments.apply();
+if (assignments.getItemCount() < 0) return this; // this activity has no assignments !!! nothing to do
+
+//--- Get the workflow contolled item ID --- the next few queries get there step by step  <item>, [relationship]
+//   data model:    <wf-ctrl-item>  --> [Workflow] --> <Workflow Process> --> {Workflow Process Activity] --> <Activity>
+
+// get the workflow process of this Activity
+// Retrieve the workflow item
+Item wflRel = this.newItem("Workflow","get");
+wflRel.setAttribute("select","source_id,source_type");
+Item wflProc = wflRel.createRelatedItem("Workflow Process","get");
+wflProc.setAttribute("select","name");
+Item wflProcAct = wflProc.createRelationship("Workflow Process Activity","get");
+wflProcAct.setAttribute("select","related_id");
+wflProcAct.setProperty("related_id",this.getID());
+wflRel = wflRel.apply();
+if (wflRel.getItemCount() != 1 || 
+    wflRel.getProperty("source_id","").Length != 32 || 
+    wflRel.getPropertyAttribute("source_type","keyed_name","").Length < 1)
+{
+  // Revoke permissions
+  if (PermissionWasSet) Aras.Server.Security.Permissions.RevokeIdentity(plmIdentity);
+  return inn.newError("Error retrieving workflow: "+wflRel.getErrorString());
+}
+
+string wf_ctrld_ItemTypeName = wflRel.getPropertyAttribute("source_type","keyed_name","");
+string wf_ctrldItemId = wflRel.getProperty("source_id","NON_EXISTING_ID");
+
+ArrayList resolvedIdents = new ArrayList();
+ArrayList resolvedRqrdFlags = new ArrayList();
+ArrayList resolvedForAllFlags = new ArrayList();
+ArrayList resolvedVotingWeights = new ArrayList();
+string reqrdFlag,forAllFlag,votingWeight,identId,identName;
+Item identItem, assignment;
+bool placeHoldersFound = false;
+
+// loop thru assigned identities - and register existing identies - except the ${place holders
+for (int i=0; i<assignments.getItemCount() && !placeHoldersFound; i++) {
+  assignment = assignments.getItemByIndex(i);
+  identItem = assignment.getPropertyItem ("related_id");
+  
+  identName = identItem.getProperty("name","");
+  if (identName.IndexOf("${") < 0) {
+    resolvedIdents.Add(identItem.getProperty("id",""));
+	resolvedRqrdFlags.Add(assignment.getProperty("is_required","0"));
+	resolvedForAllFlags.Add(assignment.getProperty("for_all_members","0"));
+	resolvedVotingWeights.Add(assignment.getProperty("voting_weight","0"));
+  }
+  else {placeHoldersFound = true;}
+}
+if (!placeHoldersFound) {
+  // Revoke permissions
+  if (PermissionWasSet) Aras.Server.Security.Permissions.RevokeIdentity(plmIdentity);
+  return this; // nothing to do
+} 
+
+// loop thru assigned identities again - and resolve the ${ place holders
+for (int i=0; i<assignments.getItemCount(); i++) {
+  assignment = assignments.getItemByIndex(i);
+  identItem = assignment.getPropertyItem ("related_id");
+  
+  reqrdFlag = assignment.getProperty("is_required","0");
+  forAllFlag = assignment.getProperty("for_all_members","0");
+  votingWeight = assignment.getProperty("voting_weight","0");
+  identId = identItem.getProperty("id","");
+  identName = identItem.getProperty("name","");
+  
+  string identRule = identItem.getProperty("place_holder_resolution_rule","");
+  
+  // check, if identity is marked as place holder - if not add this identId to list  - else resolve the place hoder
+  // check if place holder identity has rules defined
+  if (identRule != "") {
+    string ruleStr = identRule;
+	string IdentityPropName;
+	char[] splitChars = {'@'};
+	string[] ruleArray = ruleStr.Split(splitChars);
+	string existingRqrdFlag,existingForAllFlag, amlStr;
+	Item q = this.newItem();
+	int idx;
+	  
+	// check if current wf controlled item type matches the type defined in rule
+	if (ruleArray[1] == wf_ctrld_ItemTypeName) {
+	 switch (ruleArray[0]) {
+       //   Option1:  ${thisItem@<wf controlled item>@<property name>}
+	   case "thisItem":
+		//  with:  <wf_controlled_item> = ruleArray[1] ; <property_name>=ruleArray[2]
+		IdentityPropName=ruleArray[2];
+		amlStr = "<Item type='"+ruleArray[1]+"' action='get' select='"+IdentityPropName+"'><id>"+wf_ctrldItemId+"</id></Item>";
+        q.loadAML(amlStr);
+        try {q = q.apply();}
+        catch {
+		  // Revoke permissions
+          if (PermissionWasSet) Aras.Server.Security.Permissions.RevokeIdentity(plmIdentity);
+          return inn.newError("Resolution of of '"+identRule+"' failed ! (Error in AML: '"+amlStr+"')");
+        }
+        if (q.getItemCount() == 1) {
+		  identId = q.getProperty(IdentityPropName,"");
+		  if (identId !="") {
+  		    idx = -1;	
+			for(int s=0; s<resolvedIdents.Count; s++) {
+			  string searchIdentId = resolvedIdents[s].ToString();
+			  if (searchIdentId ==identId){idx=s;}
+			}
+			// is identId in list ?
+  		    if (idx >= 0) {
+			  existingRqrdFlag = resolvedRqrdFlags[idx].ToString();
+			  if (existingRqrdFlag != "1" && reqrdFlag == "1" ) {resolvedRqrdFlags[idx] = reqrdFlag;}
+			  existingForAllFlag = resolvedForAllFlags[idx].ToString();
+			  if (existingForAllFlag != "1" && forAllFlag == "1" ) {resolvedForAllFlags[idx] = forAllFlag;}
+			}
+			else {
+		      resolvedIdents.Add(identId);
+	          resolvedRqrdFlags.Add(reqrdFlag);
+	          resolvedForAllFlags.Add(forAllFlag);
+	          resolvedVotingWeights.Add(votingWeight);
+			}
+ 		  }
+		}
+	    break;
+		
+       //   Option2:  ${relList@<wf controlled item>@<relationship name>@<rel property name>}
+	   case "relList":
+	   
+		//   with: <releationship_name = ruleArray[2]
+		IdentityPropName=ruleArray[3];
+		amlStr = "<Item type='"+ruleArray[2]+"' action='get' select='"+IdentityPropName+"'><source_id>"+wf_ctrldItemId+"</source_id></Item>";
+        q.loadAML(amlStr);
+        try {q = q.apply();}
+        catch {
+		  // Revoke permissions
+          if (PermissionWasSet) Aras.Server.Security.Permissions.RevokeIdentity(plmIdentity);
+          return inn.newError("Resolution of of '"+identRule+"' failed ! (Error in AML: '"+amlStr+"')");
+        }
+		// loop through relationships
+		for (int r=0; r < q.getItemCount(); r++) {
+		  Item tmpRelItem = q.getItemByIndex(r);
+		  Item tmpItem = tmpRelItem.getRelatedItem();
+		  if (tmpItem == null) {identId ="";}
+		  else {identId = tmpItem.getProperty(IdentityPropName,"");}
+		  if (identId !="") {
+  		    idx = -1;	
+			for(int s=0; s<resolvedIdents.Count; s++) {
+			  string searchIdentId = resolvedIdents[s].ToString();
+			  if (searchIdentId ==identId){idx=s;}
+			}
+			// is identId in list ?
+  		    if (idx >= 0) {
+			  existingRqrdFlag = resolvedRqrdFlags[idx].ToString();
+			  if (existingRqrdFlag != "1" && reqrdFlag == "1" ) {resolvedRqrdFlags[idx] = reqrdFlag;}
+			  existingForAllFlag = resolvedForAllFlags[idx].ToString();
+			  if (existingForAllFlag != "1" && forAllFlag == "1" ) {resolvedForAllFlags[idx] = forAllFlag;}
+			}
+			else {
+		      resolvedIdents.Add(identId);
+	          resolvedRqrdFlags.Add(reqrdFlag);
+	          resolvedForAllFlags.Add(forAllFlag);
+	          resolvedVotingWeights.Add(votingWeight);
+			}
+ 		  }
+		}
+	    break;
+		
+	   //   Option3:  ${relItem@<wf controlled item>@<relationship name>@<related_property>@<property name>}
+	   case "relListItem":
+        
+		//   with: <releationship_name = ruleArray[2]  and <related_property>=ruleArray[2] 
+		IdentityPropName=ruleArray[4];
+		string linkPropName=ruleArray[3];
+		amlStr = "<Item type='"+ruleArray[2]+"' action='get' select='"+linkPropName+"("+IdentityPropName+")'><source_id>"+wf_ctrldItemId+"</source_id></Item>";
+        q.loadAML(amlStr);
+        try {q = q.apply();}
+        catch {
+		  // Revoke permissions
+         if (PermissionWasSet) Aras.Server.Security.Permissions.RevokeIdentity(plmIdentity);
+          return inn.newError("Resolution of of '"+identRule+"' failed ! (Error in AML: '"+amlStr+"')");
+        }
+		// loop through relationships
+		for (int r=0; r < q.getItemCount(); r++) {
+		  Item tmpRelItem = q.getItemByIndex(r);
+		  Item tmpItem = tmpRelItem.getPropertyItem(linkPropName);
+		  if (tmpItem == null) {identId ="";}
+		  else {identId = tmpItem.getProperty(IdentityPropName,"");}
+		  if (identId !="") {
+  		    idx = -1;	
+			for(int s=0; s<resolvedIdents.Count; s++) {
+			  string searchIdentId = resolvedIdents[s].ToString();
+			  if (searchIdentId ==identId){idx=s;}
+			}
+			// is identId in list ?
+  		    if (idx >= 0) {
+			  existingRqrdFlag = resolvedRqrdFlags[idx].ToString();
+			  if (existingRqrdFlag != "1" && reqrdFlag == "1" ) {resolvedRqrdFlags[idx] = reqrdFlag;}
+  			  existingForAllFlag = resolvedForAllFlags[idx].ToString();
+			  if (existingForAllFlag != "1" && forAllFlag == "1" ) {resolvedForAllFlags[idx] = forAllFlag;}
+			}
+			else {
+		      resolvedIdents.Add(identId);
+	          resolvedRqrdFlags.Add(reqrdFlag);	      
+	          resolvedForAllFlags.Add(forAllFlag);
+	          resolvedVotingWeights.Add(votingWeight);
+			}
+ 		  }
+		}
+	    break;
+		
+	   default:
+        break;	
+	 }
+	}
+  }
+}
+
+// Loop through list of resolvedIdentities and update (merge) with list of assignees on this wf activity
+for (int i=0; i<resolvedIdents.Count; i++) {
+  assignment = this.newItem("Activity Assignment","merge");
+  assignment.setAttribute("where","Activity_Assignment.source_id='"+thisActivityId+"' AND Activity_Assignment.source_id='"+resolvedIdents[i]+"'");
+  assignment.setProperty("source_id", thisActivityId);
+  assignment.setProperty("related_id", resolvedIdents[i].ToString());
+  assignment.setProperty("voting_weight", resolvedVotingWeights[i].ToString());
+  assignment.setProperty("is_required", resolvedRqrdFlags[i].ToString());
+  assignment.setProperty("for_all_members", resolvedForAllFlags[i].ToString());
+  assignment = assignment.apply();
+}
+
+//get the updated list of assignments of this activity again   -- merge action seems to add duplicate identities -- we need to clean up now
+assignments = this.newItem("Activity Assignment","get");
+assignments.setProperty("source_id", thisActivityId);
+assignments.setAttribute("select", "is_required,voting_weight,for_all_members, related_id(id,name, description)");
+assignments = assignments.apply();
+if (assignments.getItemCount() < 0) {
+  // Revoke permissions
+  if (PermissionWasSet) Aras.Server.Security.Permissions.RevokeIdentity(plmIdentity);
+ return this; // this activity has no assignments !!! nothing to do
+}
+
+// Loop through list a final time to remove the place holder and duplicate identities
+resolvedIdents = new ArrayList();
+for (int i=0; i<assignments.getItemCount(); i++) {
+  assignment = assignments.getItemByIndex(i);
+  identItem = assignment.getPropertyItem ("related_id");
+  identId = identItem.getProperty("id","");
+  identName = identItem.getProperty("name","");
+  
+  // check, if identity is marked as place holder - if not add this identId to list  - else resolve the place hoder
+  if (identName.IndexOf("${") >=0) {
+    assignment.setAction("delete");
+	assignment = assignment.apply();  // delete this assignment
+  }
+  else {
+    if (resolvedIdents.Contains(identId)) {
+      assignment.setAction("delete");
+	  assignment = assignment.apply();  // delete this assignment
+    }
+    else {resolvedIdents.Add(identId);}
+  }
+}
+// Revoke permissions
+if (PermissionWasSet) Aras.Server.Security.Permissions.RevokeIdentity(plmIdentity);
+
+// done
+return this;]]></method_code>
+  <method_type>C#</method_type>
+  <name>WF ResolvePlaceHolderOnActivity</name>
+ </Item>
+</AML>

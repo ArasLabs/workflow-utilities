@@ -11,11 +11,16 @@
   <node_name_color></node_name_color>
   <node_name_font></node_name_font>
   <node_size></node_size>
+  <process_owner keyed_name="Creator" type="Identity">
+   <Item type="Identity" action="get" select="id">
+    <name>Creator</name>
+   </Item>
+  </process_owner>
   <transition_line_color></transition_line_color>
   <transition_name_color></transition_name_color>
   <transition_name_font></transition_name_font>
   <Relationships>
-   <Item type="Workflow Map Activity" id="F5F251AED1AA4F5294FCC90658E3BC50" action="add">
+   <Item type="Workflow Map Activity" id="613BF9CB9B1C4E9A869F379A2419937B" action="add">
     <related_id keyed_name="Cancel Change" type="Activity Template">
      <Item type="Activity Template" id="02A18C260C64485C9679D662EA92B125" action="add">
       <can_delegate>0</can_delegate>
@@ -48,7 +53,7 @@
     <source_id keyed_name="Express Team DCO" type="Workflow Map">94E9141E761F42308E3393C7014A8D50</source_id>
    </Item>
   
-   <Item type="Workflow Map Activity" id="9E52CAFD7B3A4E818F924A8EFE6FD85B" action="add">
+   <Item type="Workflow Map Activity" id="9DC398E579B04AD19FEE0F2C3794D019" action="add">
     <related_id keyed_name="Close Change" type="Activity Template">
      <Item type="Activity Template" id="56D01465CC4A4F2483A4E2F70A001BE0" action="add">
       <can_delegate>0</can_delegate>
@@ -88,7 +93,7 @@
     <sort_order>128</sort_order>
     <source_id keyed_name="Express Team DCO" type="Workflow Map">94E9141E761F42308E3393C7014A8D50</source_id>
    </Item>
-   <Item type="Workflow Map Activity" id="9DB52DC468934801A109429253872A20" action="add">
+   <Item type="Workflow Map Activity" id="9E2A40FE1922401B936E5D74F065C407" action="add">
     <related_id keyed_name="Draft Changes" type="Activity Template">
      <Item type="Activity Template" id="1E53671D371C4CC993A54CEC428DFA19" action="add">
       <can_delegate>1</can_delegate>
@@ -114,6 +119,16 @@
         <sort_order>128</sort_order>
         <source_id keyed_name="Draft Changes" type="Activity Template">1E53671D371C4CC993A54CEC428DFA19</source_id>
         <voting_weight>100</voting_weight>
+       </Item>
+       <Item type="Activity Template Method" id="5ADD6555C38740B59079E8667ED181C2" action="add">
+        <event>on_activate</event>
+        <related_id keyed_name="Clone WorkflowActivityToPending" type="Method">
+         <Item type="Method" action="get" select="id">
+          <name>Clone WorkflowActivityToPending</name>
+         </Item>
+        </related_id>
+        <sort_order>128</sort_order>
+        <source_id keyed_name="Draft Changes" type="Activity Template">1E53671D371C4CC993A54CEC428DFA19</source_id>
        </Item>
        <Item type="Activity Template Task" id="05DD3E840B08442C8CFF158F1B5745FE" action="add">
         <description xml:lang="en">Make changes to the new revisions of affected documents</description>
@@ -181,7 +196,7 @@
     <sort_order>384</sort_order>
     <source_id keyed_name="Express Team DCO" type="Workflow Map">94E9141E761F42308E3393C7014A8D50</source_id>
    </Item>
-   <Item type="Workflow Map Activity" id="DC2AD61BB2FC400893BFDB1BEFC56DD8" action="add">
+   <Item type="Workflow Map Activity" id="8E5B924A1CC34F4CBA8F49E34BB7BCA3" action="add">
     <related_id keyed_name="Final Review" type="Activity Template">
      <Item type="Activity Template" id="65CF82C05D97422D9BF68A9A7B444D9B" action="add">
       <can_delegate>1</can_delegate>
@@ -253,7 +268,7 @@
     <sort_order>640</sort_order>
     <source_id keyed_name="Express Team DCO" type="Workflow Map">94E9141E761F42308E3393C7014A8D50</source_id>
    </Item>
-   <Item type="Workflow Map Activity" id="4DC4D7AA44354FAF99112D9B5B375F6F" action="add">
+   <Item type="Workflow Map Activity" id="7C457CFBF70F46C293F1578BC8E4FA5A" action="add">
     <related_id keyed_name="Planning" type="Activity Template">
      <Item type="Activity Template" id="F9C260FF77B74CB5892F47CD6FDDFC23" action="add">
       <can_delegate>1</can_delegate>
@@ -347,7 +362,7 @@
     <sort_order>256</sort_order>
     <source_id keyed_name="Express Team DCO" type="Workflow Map">94E9141E761F42308E3393C7014A8D50</source_id>
    </Item>
-   <Item type="Workflow Map Activity" id="03B74118254C4E62A50511937AFE529E" action="add">
+   <Item type="Workflow Map Activity" id="808044F2938E4664889337084B091B36" action="add">
     <related_id keyed_name="Start" type="Activity Template">
      <Item type="Activity Template" id="AE212E2D9C1245E2BFB04E40542FF8AC" action="add">
       <can_delegate>0</can_delegate>
@@ -386,7 +401,7 @@
     <sort_order>128</sort_order>
     <source_id keyed_name="Express Team DCO" type="Workflow Map">94E9141E761F42308E3393C7014A8D50</source_id>
    </Item>
-   <Item type="Workflow Map Activity" id="6A4337195BEC4FFA8E0C2AACC21897D7" action="add">
+   <Item type="Workflow Map Activity" id="8047C6B7E50344449722D64364D631D3" action="add">
     <related_id keyed_name="Team Review" type="Activity Template">
      <Item type="Activity Template" id="DCF07E7D5421447C91B79E61E997E94A" action="add">
       <can_delegate>1</can_delegate>
@@ -405,19 +420,23 @@
       <x>479</x>
       <y>55</y>
       <Relationships>
+       <Item type="Activity Template Assignment" id="30C594E3C5D74A1EB6A197B4F2950AAB" action="add">
+        <for_all_members>0</for_all_members>
+        <is_required>0</is_required>
+        <related_id keyed_name="Creator" type="Identity">
+         <Item type="Identity" action="get" select="id">
+          <name>Creator</name>
+         </Item>
+        </related_id>
+        <sort_order>128</sort_order>
+        <source_id keyed_name="Team Review" type="Activity Template">DCF07E7D5421447C91B79E61E997E94A</source_id>
+        <voting_weight>100</voting_weight>
+       </Item>
        <Item type="Activity Template Assignment" id="5BF5A127FEA946E1B2832AA80A8CC962" action="add">
         <for_all_members>0</for_all_members>
         <is_required>1</is_required>
         <related_id keyed_name="Team Manager" type="Identity">60EBF9D1BB584921A73FA2F8D74DAF80</related_id>
         <sort_order>256</sort_order>
-        <source_id keyed_name="Team Review" type="Activity Template">DCF07E7D5421447C91B79E61E997E94A</source_id>
-        <voting_weight>100</voting_weight>
-       </Item>
-       <Item type="Activity Template Assignment" id="30C594E3C5D74A1EB6A197B4F2950AAB" action="add">
-        <for_all_members>1</for_all_members>
-        <is_required>0</is_required>
-        <related_id keyed_name="Team Member" type="Identity">7635594273054F2BA32C1CADB31FD413</related_id>
-        <sort_order>128</sort_order>
         <source_id keyed_name="Team Review" type="Activity Template">DCF07E7D5421447C91B79E61E997E94A</source_id>
         <voting_weight>100</voting_weight>
        </Item>
