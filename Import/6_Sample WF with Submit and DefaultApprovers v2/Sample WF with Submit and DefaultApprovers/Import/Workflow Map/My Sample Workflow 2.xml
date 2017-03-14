@@ -1,0 +1,141 @@
+﻿<AML>
+ <Item type="Workflow Map" id="2FE667E966834E479CACFD4870A848A3" action="add">
+  <description xml:lang="en">WF 2</description>
+  <node_bg_color>       </node_bg_color>
+  <node_label1_color>       </node_label1_color>
+  <node_label1_font />
+  <node_label2_color>       </node_label2_color>
+  <node_label2_font />
+  <node_name_color>       </node_name_color>
+  <node_name_font />
+  <node_size />
+  <owned_by_id keyed_name="Innovator Admin" type="Identity">DBA5D86402BF43D5976854B8B48FCDD1</owned_by_id>
+  <process_owner keyed_name="Creator" type="Identity">
+   <Item type="Identity" action="get" select="id">
+    <name>Creator</name>
+   </Item>
+  </process_owner>
+  <transition_line_color>       </transition_line_color>
+  <transition_name_color>       </transition_name_color>
+  <transition_name_font />
+  <name>My Sample Workflow 2</name>
+  <Relationships>
+   <Item type="Workflow Map Activity" action="add">
+    <owned_by_id keyed_name="Innovator Admin" type="Identity">DBA5D86402BF43D5976854B8B48FCDD1</owned_by_id>
+    <related_id keyed_name="Cancelled" type="Activity Template">
+     <Item type="Activity Template" id="00BAD47F49454E28873731D19A2342AA" action="add">
+      <can_delegate>0</can_delegate>
+      <can_refuse>0</can_refuse>
+      <consolidate_ondelegate>0</consolidate_ondelegate>
+      <expected_duration>0</expected_duration>
+      <icon>../images/Delete.svg</icon>
+      <is_auto>1</is_auto>
+      <is_end>1</is_end>
+      <is_start>0</is_start>
+      <message xml:lang="en">Please Review...</message>
+      <priority>1</priority>
+      <reminder_count>0</reminder_count>
+      <reminder_interval>0</reminder_interval>
+      <timeout_duration>0</timeout_duration>
+      <wait_for_all_inputs>0</wait_for_all_inputs>
+      <wait_for_all_votes>0</wait_for_all_votes>
+      <x>360</x>
+      <y>19</y>
+      <name>Cancelled</name>
+      <Relationships>
+       <Item type="Activity Template Transition" id="BC68349171D54B24A8B2EA7FF91F86D1" action="add">
+        <controlled_itemtype keyed_name="My Sample WorkflowForm" type="ItemType" name="My Sample WorkflowForm">0976A110AB6C4F9FBFA9ADD1A7899557</controlled_itemtype>
+        <event>on_activate</event>
+        <related_id keyed_name="3E496A84C1234B1582F6B0CDAA3FB0FF" type="Life Cycle Transition">3E496A84C1234B1582F6B0CDAA3FB0FF</related_id>
+        <sort_order>128</sort_order>
+        <source_id keyed_name="Cancelled" type="Activity Template">00BAD47F49454E28873731D19A2342AA</source_id>
+       </Item>
+      </Relationships>
+     </Item>
+    </related_id>
+    <sort_order>128</sort_order>
+    <source_id keyed_name="My Sample Workflow 2" type="Workflow Map">2FE667E966834E479CACFD4870A848A3</source_id>
+   </Item>
+   <Item type="Workflow Map Activity" action="add">
+    <owned_by_id keyed_name="Innovator Admin" type="Identity">DBA5D86402BF43D5976854B8B48FCDD1</owned_by_id>
+    <related_id keyed_name="Start" type="Activity Template">
+     <Item type="Activity Template" id="28625B8ADBBA454DB26516B025D33DD8" action="add">
+      <can_delegate>0</can_delegate>
+      <can_refuse>0</can_refuse>
+      <consolidate_ondelegate>0</consolidate_ondelegate>
+      <expected_duration>0</expected_duration>
+      <icon>../images/WorkflowStart.svg</icon>
+      <is_auto>1</is_auto>
+      <is_end>0</is_end>
+      <is_start>1</is_start>
+      <message xml:lang="en">Please Review...</message>
+      <priority>2</priority>
+      <reminder_count>0</reminder_count>
+      <reminder_interval>0</reminder_interval>
+      <timeout_duration>0</timeout_duration>
+      <wait_for_all_inputs>0</wait_for_all_inputs>
+      <wait_for_all_votes>0</wait_for_all_votes>
+      <x>20</x>
+      <y>20</y>
+      <name>Start</name>
+      <Relationships>
+       <Item type="Workflow Map Path" id="A4EA7B5DFB1743AAB1B123842753B1C7" action="add">
+        <authentication>none</authentication>
+        <is_default>1</is_default>
+        <is_override>0</is_override>
+        <name>Go</name>
+        <related_id>317CD5D2DEAE498F8DBCDD6F1A1CA076</related_id>
+        <segments />
+        <sort_order>128</sort_order>
+        <source_id keyed_name="Start" type="Activity Template">28625B8ADBBA454DB26516B025D33DD8</source_id>
+       </Item>
+      </Relationships>
+     </Item>
+    </related_id>
+    <sort_order>256</sort_order>
+    <source_id keyed_name="My Sample Workflow 2" type="Workflow Map">2FE667E966834E479CACFD4870A848A3</source_id>
+   </Item>
+   <Item type="Workflow Map Activity" action="add">
+    <owned_by_id keyed_name="Innovator Admin" type="Identity">DBA5D86402BF43D5976854B8B48FCDD1</owned_by_id>
+    <related_id keyed_name="WF2 Submitted" type="Activity Template">
+     <Item type="Activity Template" id="317CD5D2DEAE498F8DBCDD6F1A1CA076" action="add">
+      <can_delegate>1</can_delegate>
+      <can_refuse>1</can_refuse>
+      <consolidate_ondelegate>0</consolidate_ondelegate>
+      <icon>../images/WorkflowNode.svg</icon>
+      <is_auto>0</is_auto>
+      <is_end>0</is_end>
+      <is_start>0</is_start>
+      <message xml:lang="en">Please Review...</message>
+      <wait_for_all_inputs>0</wait_for_all_inputs>
+      <wait_for_all_votes>0</wait_for_all_votes>
+      <x>190</x>
+      <y>20</y>
+      <name>WF2 Submitted</name>
+      <Relationships>
+       <Item type="Activity Template Assignment" id="B69615EB42C9419F90580D1E236A35CB" action="add">
+        <related_id keyed_name="Administrators" type="Identity">2618D6F5A90949BAA7E920D1B04C7EE1</related_id>
+        <sort_order>128</sort_order>
+        <source_id keyed_name="WF2 Submitted" type="Activity Template">317CD5D2DEAE498F8DBCDD6F1A1CA076</source_id>
+        <is_required>0</is_required>
+        <for_all_members>0</for_all_members>
+        <voting_weight>100</voting_weight>
+       </Item>
+       <Item type="Workflow Map Path" id="17F5E49CA06F42AB9F20710CEF0EB090" action="add">
+        <authentication>none</authentication>
+        <is_default>0</is_default>
+        <is_override>0</is_override>
+        <name>Cancel</name>
+        <related_id>00BAD47F49454E28873731D19A2342AA</related_id>
+        <sort_order>128</sort_order>
+        <source_id keyed_name="WF2 Submitted" type="Activity Template">317CD5D2DEAE498F8DBCDD6F1A1CA076</source_id>
+       </Item>
+      </Relationships>
+     </Item>
+    </related_id>
+    <sort_order>384</sort_order>
+    <source_id keyed_name="My Sample Workflow 2" type="Workflow Map">2FE667E966834E479CACFD4870A848A3</source_id>
+   </Item>
+  </Relationships>
+ </Item>
+</AML>

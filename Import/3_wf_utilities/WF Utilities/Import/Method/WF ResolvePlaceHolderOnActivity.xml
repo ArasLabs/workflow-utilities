@@ -1,0 +1,380 @@
+﻿<AML>
+ <Item type="Method" id="2E11832393A745CD89312B76D9FF823A" action="add">
+  <comments>use with Server Event 'onAssign' on WF Activities</comments>
+  <execution_allowed_to keyed_name="World" type="Identity">A73B655731924CD0B027E4F4D5FCC0A9</execution_allowed_to>
+  <method_code><![CDATA[// C#
+//Method: WF ResolvePlaceHolderOnActivity
+//
+// Can be called from work flow activity's server event 'OnAssin' on any 'assignment' on Workflow Maps.
+// Assumes you create place holder identities with special naming and use them for work flow acitivy assignments.
+// Whereever you use a place holder identity ${<name>} you must add this method to the server event of this WF activity.
+//
+// NOTE: You must add a property "place_holder_resolution_rule" of type 'string  size=128' to itemType 'Identity'
+//       you mut log on as 'root' to do so !!!) - make the property 'hidden' on grids and add it to form 'Identity For Admins' only
+//       Place holder identities do not need to have Members configured.
+//
+// RULES:
+//  The logic will look at the list of assignees of the activity this method gets started from.
+//  There it will look for identitity names with special notation (format)
+//  Any identity starting with "${"  it will treat as a place holder and try to resolve it.
+//  The rules how to resolve are expected in the identity’s "description" field (increase lentgth to 100).
+//  The result of the rules resolution is one or more identity_ids to be used instead of the place holder.
+//  If an identity is already listed, but would also be added again by a resolved identity the following precedence rules apply:
+//     no duplicate identities will be added !
+//     if the existing identity has flag "required" set,  it stays
+//     if the existing identity has flag "required" NOT set and the resolved identity has the flag set, the flag will be set on the existing,
+//     voting weight, for_all_members_flag, escalate_to settings of exisitng identities will always stay
+//     voting weight setting on place holder identity will be used for resolved identity
+//     for_all_members_flag, escalate_to settings on place holder will be ignored for resolved identity
+
+// The place holder identity will be removed from the Activity and the new 'resolved' identities will be added.
+
+/// These Rules define where to find a property of type "Item" with Data Source "Identity"
+/*
+  This logic will look at the list of assignees of the activity this method is connected to (via "opnAssign" event).
+  There it will look for identitity names with a special naming (format). ${<identity_name>}
+  Any identity starting with "${"  it will treat as a place holder and try to resolve it.
+
+  The rules how to resolve are expected in the identity’s property "place_holder_resolution_rule" (lentgth = 512).
+  The result of the rules resolution is one or more identities to be used instead of the place holder.
+
+  If an identity is already listed, but would also be added again by a resolved identity the following precedence rules apply:
+     - no duplicate identities will be added !
+     - if the existing identity has flag "required" set,  it stays
+     - if the existing identity has flag "required" NOT set and the resolved identity has the flag set, the flag will be set on the existing,
+     - voting weight, for_all_members_flag, escalate_to settings of exisitng identities will always stay
+     - voting weight setting on place holder identity will be used for resolved identity
+     - for_all_members_flag, escalate_to settings on place holder will be ignored for resolved identity
+
+  The placeholder identity will be removed from the Activity and the new 'resolved' identities will be added.
+
+  These Rules define where to find a property of type "Item" with Data Source "Identity". 
+  An AML syntax is used to define a query started from the workflow controlled item. Tag id="{@id}" must be used on the top <Item ...> attributes.
+
+  The <Item ...> where the identity property is must be tagged with attribute: resolveToIdentity="<prop_name>" 
+  (Where <prop_name> = name of property pointing to an identity to be use in this resolution).
+
+  Optionally the same <Item ...> with the identity property can be tagged with attribute propertyToMatchActivityName="<act_prop_name>" 
+  (Where <act_prop_name> = name of property containing the name of the workflow activity the identity shall be added to).
+
+  Here are some examples:
+*/
+
+/// Case 1 - Example: "Simple ECO" has a property "management_CRB_id" pointing to an identity that shall be used instead of placeholder identity
+//  placeholder identity name => ${ECO Mgmt CRB} 
+//  place_holder_resolution_rule => <Item type="Simple ECO" id="{@id}" resolveToIdentity="management_CRB_id"></Item>
+
+/// Case 2 - Example: "PR" has a property pointing to an item with a property "owned_by_id" pointing to an identity that shall be used instead of placeholder identity
+//  placeholder identity name => ${PR Affected Item Owner} 
+//  place_holder_resolution_rule => 
+//                                            <Item type="PR" id="{@id}" >
+//                                            <affected_item>
+//                                              <Item type="Change Controlled Item" resolveToIdentity="owned_by_id" />
+//                                            </affected_item>
+//                                            </Item>
+
+/// Case 3 - Example: "Simple ECO" has a NULL relationship "Simple ECO Approvers" with a property "approver_id" pointing to an identity.
+///                     Those found for all relationships shall be used instead of placeholder identity.
+//  placeholder identity name => ${Simple ECO Approvers} 
+//  place_holder_resolution_rule => 
+//                                            "<Item type="Simple ECO" id="{@id}" >
+//                                            <Relationships>
+//                                              <Item type="Simple ECO Approvers" resolveToIdentity="approver_id" />
+//                                            </Relationships>
+//                                            </Item>
+
+/// Case 3+ - Example: "Simple ECO" has a relationship "Simple ECO Approver" pointing to an identity (via standard property related_id)
+///                                          The relationship also has a property that identifies the name of the WF activity the related identity shall be connected to.
+///                          Those found for all relationships shall be used instead of placeholder identity.
+//  placeholder identity name => ${Simple ECO Approvers by Activity} 
+//  place_holder_resolution_rule => 
+//                                            "<Item type="Simple ECO" id="{@id}" >
+//                                            <Relationships>
+//                                              <Item type="Simple ECO Approver" resolveToIdentity="related_id" propertyToMatchActivityName='wf_activity_name' />
+//                                            </Relationships>
+//                                            </Item>
+
+/// Case 4 - Example: "ECN" has a relationship "ECN Affected Item" with related items of type "Affected Item" that have a property "new_item_id" pointing to an item of type
+///                                          "Change Controlled Item" with a property "owned_by_id" pointing to an identity. 
+///                                          All "Change Controlled Item" owners shall be used instead of placeholder identity.
+//  placeholder identity name => ${ECN AffItem NewItem Owners} 
+//  place_holder_resolution_rule => 
+//                                            <Item type="ECN" id="{@id}" >
+//                                            <Relationships>
+//                                            <Item type="ECN Affected Item">
+//                                              <related_id>
+//                                               <Item type="Affected Item" >
+//                                                <new_item_id>
+//                                                 <Item type="Change Controlled Item" resolveToIdentity="owned_by_id" />
+//                                                </new_item_id>
+//                                               </Item>
+//                                              </related_id>
+//                                            </Item>
+//                                            </Relationships>
+//                                            </Item>
+
+string thisActivityId = this.getAttribute("id");
+string thisActivityName = this.getProperty("name","");
+
+//System.Diagnostics.Debugger.Break(); 
+
+// Grant 'Aras PLM' permissions
+Aras.Server.Security.Identity plmIdentity = Aras.Server.Security.Identity.GetByName("Super User");
+bool PermissionWasSet  = Aras.Server.Security.Permissions.GrantIdentity(plmIdentity);
+
+//checks
+//get list of assignments of this activity
+Item assignments = this.newItem("Activity Assignment","get");
+assignments.setProperty("source_id", thisActivityId);
+assignments.setAttribute("select", "is_required,voting_weight, for_all_members, related_id(id,name,description,place_holder_resolution_rule)") ;
+assignments = assignments.apply();
+if (assignments.getItemCount() < 0) return this; // this activity has no assignments !!! nothing to do
+
+//--- Get the workflow contolled item --- calling a generic method
+Item qryItem = this.newItem("Activity","Get WF Controlled Item");
+qryItem.setID(thisActivityId);
+Item wfCtrldItem = qryItem.apply();
+if (wfCtrldItem.isError()) {return wfCtrldItem;}
+
+string wf_ctrld_ItemTypeName = wfCtrldItem.getType();
+string wf_ctrldItemId = wfCtrldItem.getID();
+
+List<ActAssignment> assignmentsToResolve = new List<ActAssignment>();
+
+Item identItem, assignment;
+bool placeHoldersFound = false;
+string identName;
+
+// loop thru assigned identities - and register existing identies - and ${place holders identities separatedly
+for (int i=0; i<assignments.getItemCount() && !placeHoldersFound; i++) {
+  assignment = assignments.getItemByIndex(i);
+  identItem = assignment.getPropertyItem ("related_id");
+
+                ActAssignment actAssignm = new ActAssignment();
+                actAssignm.id = assignment.getID();
+                actAssignm.identId = identItem.getProperty("id","");
+                actAssignm.sortOrder = assignment.getProperty("sort_order","");
+                actAssignm.isRequired = assignment.getProperty("is_required","0");
+                actAssignm.forAllMembers = assignment.getProperty("for_all_members","0");
+                actAssignm.votingWeight = assignment.getProperty("voting_weight","0");
+                actAssignm.actionCode = 0;
+
+  identName = identItem.getProperty("name","");
+  if (identName.IndexOf("${") >= 0) {
+                placeHoldersFound = true;
+                assignmentsToResolve.Add(actAssignm);
+  }
+}
+if (!placeHoldersFound) {
+  // Revoke permissions
+  if (PermissionWasSet) Aras.Server.Security.Permissions.RevokeIdentity(plmIdentity);
+  return this; // nothing to do
+} 
+
+// resolve the ${ place holder identities - and 
+List<ActAssignment> assignmentsToAdd = new List<ActAssignment>();
+foreach(ActAssignment resAssignm in assignmentsToResolve)
+{
+                assignment = assignments.getItemsByXPath("//Item[@id='"+resAssignm.id+"']");
+                identItem = assignment.getPropertyItem ("related_id");
+                string identRule = identItem.getProperty("place_holder_resolution_rule","");  
+
+                if (identRule != "") {
+                                identRule = identRule.Replace("{@id}",wf_ctrldItemId);
+                                Item ruleQryItem = this.newItem("");
+                                ruleQryItem.loadAML(identRule);
+                                
+                                // check if current wf controlled item type matches the type defined in rule
+                                if (ruleQryItem.getType() == wf_ctrld_ItemTypeName) {
+
+                                                // resolve the rule of this placeholder identity
+                                                Item resolvedIdentityItems = getResolvedIdentityItemForPlaceHolderRule (wf_ctrldItemId, ruleQryItem, thisActivityName);
+                                                if (resolvedIdentityItems.getItemByIndex(0).getType() != "DUMMY" && resolvedIdentityItems.getItemCount() > 0) {
+                                                                int identCount = resolvedIdentityItems.getItemCount();
+                                                                
+                                                                resAssignm.actionCode = 1; //update
+                                                                resAssignm.identId = resolvedIdentityItems.getItemByIndex(0).getID();
+                                                                assignmentsToAdd.Add(resAssignm);
+
+                                                                int fractionalVote = Convert.ToInt32(resAssignm.votingWeight);
+                                                                if (identCount > 1) {
+                                                                                fractionalVote = Convert.ToInt32(fractionalVote);
+                                                                                assignmentsToAdd[0].votingWeight = Convert.ToString(fractionalVote+1);
+                                                                }
+                                                                
+                                                                for (int r=1; r < resolvedIdentityItems.getItemCount(); r++) {
+                                                                                                ActAssignment actAssignm = new ActAssignment();
+                                                                                                actAssignm.id = this.getInnovator().getNewID();
+                                                                                                actAssignm.identId = resolvedIdentityItems.getItemByIndex(r).getID();
+                                                                                                actAssignm.sortOrder = resAssignm.sortOrder;
+                                                                                                actAssignm.isRequired = resAssignm.isRequired;
+                                                                                                actAssignm.forAllMembers = resAssignm.forAllMembers;
+                                                                                                actAssignm.votingWeight = Convert.ToString(fractionalVote);
+                                                                                                actAssignm.actionCode = 2; // add
+                                                                                                
+                                                                                                assignmentsToAdd.Add(actAssignm);                                                    
+                                                                }
+                                                }
+                                                else {
+                                                                resAssignm.actionCode = 3;  // resolution failed - delete the place holder assignment later.
+                                                }
+                                }
+                                else {
+                                                resAssignm.actionCode = 3;  // resolution failed - delete the place holder assignment later.
+                                }
+                }
+}
+
+// merge Assignemnts
+foreach(ActAssignment Assignm in assignmentsToAdd)
+{
+                Item mergItem = this.newItem("Activity Assignment","merge");
+                mergItem.setID(Assignm.id);
+                mergItem.setAttribute("serverEvents","0");
+                
+                mergItem.setProperty("source_id", thisActivityId);
+                mergItem.setProperty("related_id",Assignm.identId);
+                mergItem.setProperty("sort_order",Assignm.sortOrder);
+                mergItem.setProperty("is_required",Assignm.isRequired);
+                mergItem.setProperty("for_all_members",Assignm.forAllMembers);
+                mergItem.setProperty("voting_weight",Assignm.votingWeight);
+                
+                mergItem = mergItem.apply();
+}
+
+// delete Assignments
+foreach(ActAssignment Assignm in assignmentsToResolve)
+{
+                if (Assignm.actionCode == 3) {
+                                Item delCmd = this.newItem("Activity Assignment","delete");
+                                delCmd.setID(Assignm.id);
+                                delCmd = delCmd.apply();
+                }
+}
+
+// Revoke permissions
+if (PermissionWasSet) Aras.Server.Security.Permissions.RevokeIdentity(plmIdentity);
+
+// done
+return this;
+}
+
+class ActAssignment {
+                public  string id;
+                public  string identId;
+                public  string sortOrder;
+                public  string isRequired;
+                public  string forAllMembers;
+                public  string votingWeight;
+                public    int actionCode;  //0 = init; 1=update; 2=add; = delete
+}
+
+
+//--------------
+Item getResolvedIdentityItemForPlaceHolderRule (string wf_ctrldItemId, Item ruleQryItem, string thisActivityName) {
+                // add get action to query and get the Item Type with property pointing to identity to resolve  (attribute = resolveToIdentity)
+                Item res = ruleQryItem.getItemsByXPath("//Item");
+                Item itm;
+                string resultItemType = "";
+                string identityProperty = "";
+                string activityNameProperty = "";
+                
+                // prepare query according to rule
+                for (int i=0; i<res.getItemCount(); i++) {
+                                itm = res.getItemByIndex(i);
+                                itm.setAction("get");
+                                
+                                if (itm.getAttribute("resolveToIdentity","") != "") {
+                                                identityProperty = itm.getAttribute("resolveToIdentity","");
+                                                string selProps=itm.getAttribute("select","id");
+                                                selProps += ","+identityProperty+"(keyed_name)";
+                                                resultItemType = itm.getType();
+                                
+                                                if (itm.getAttribute("propertyToMatchActivityName","") != "") {
+                                                                activityNameProperty = itm.getAttribute("propertyToMatchActivityName","");
+                                                                selProps += ","+activityNameProperty;
+                                                }
+                                }
+                }
+                if (resultItemType == "" || identityProperty == "") {return this.getInnovator().newError("Error in placeholder resolution rule! Please correct syntax and/or logic.");}
+                resultItemType = getItemTypesListIfPoly(resultItemType);
+                                
+                // get data from server to do the resolution
+                res = ruleQryItem.apply();
+                if (res.isError()) {return res;}
+
+                Item dataItems;
+                if (resultItemType.IndexOf(',') > 0) {
+                                string[] arr = resultItemType.Split(',');
+                                string op = "";
+                                string condition = "";
+                                for (int a=0; a<arr.Length; a++) {
+                                                condition += op + "@type='"+arr[a]+"'";
+                                                op = " or ";
+                                }
+                                dataItems = res.getItemsByXPath("//Item[@type="+condition+"]");
+                }
+                else {
+                                dataItems = res.getItemsByXPath("//Item[@type='"+resultItemType+"']");
+                }
+                
+                Item identities = this.newItem("DUMMY"); // item collection to be returned
+
+                for (int i=0; i<dataItems.getItemCount(); i++) {
+                                itm = dataItems.getItemByIndex(i);
+                                bool doAdd = true;
+                                
+                                // Filter by Activity Name, filter set
+                                if (activityNameProperty != "") {
+                                                if (itm.getProperty(activityNameProperty,"") != thisActivityName) {doAdd=false;}
+                                }              
+                                if (doAdd) {
+                                                string identityId = itm.getProperty(identityProperty,"");
+                                                itm = this.newItem("Identitiy");
+                                                itm.setID(identityId);
+                                                identities.appendItem(itm);
+                                }
+                }
+                if (identities.getItemCount() > 1) {
+                                identities.removeItem(identities.getItemByIndex(0));
+                                return identities;
+                }
+                return identities;
+}
+
+//--------------
+string getItemTypesListIfPoly (string itemTypeName) {
+                string aml = "<Item type='Value' action='get' select='source_id(name),value,label' ><source_id><Item type='List' action='get' ><name>"+itemTypeName+"</name></Item></source_id></Item>";
+                Item qry = this.newItem("");
+                qry.loadAML(aml);
+                qry = qry.apply();
+                
+                if (qry.getItemCount() == 0) {return itemTypeName;}  // not a poly item
+                
+                List<string> typeList = new List<string>();
+                for (int i=0; i<qry.getItemCount(); i++) {
+                                typeList.Add(qry.getItemByIndex(i).getProperty("value",""));
+                }
+
+                aml = "<Item type='ItemType' action='get' select='name' ><id condition='in'>'"+string.Join("','",typeList)+"'</id></Item>";
+                qry.loadAML(aml);
+                qry = qry.apply();
+                if (qry.getItemCount() == 0) {return itemTypeName;}  // not a poly item
+                
+                typeList = new List<string>();
+                for (int i=0; i<qry.getItemCount(); i++) {
+                                typeList.Add(qry.getItemByIndex(i).getProperty("name",""));
+                }
+
+                return string.Join(",",typeList);
+}
+
+//--------------
+void EndOfModule () {
+
+]]></method_code>
+  <method_type>C#</method_type>
+  <owned_by_id keyed_name="Super User" type="Identity">6B14D33C4A7D41C188CCF2BC15BD01A3</owned_by_id>
+  <name>WF ResolvePlaceHolderOnActivity</name>
+ </Item>
+</AML>

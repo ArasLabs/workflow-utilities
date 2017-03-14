@@ -28,7 +28,7 @@ string activitiesToPromoteBackToPending = "'Team Review','Final Review'";
 
 	//System.Diagnostics.Debugger.Break();
 
-	if (thisType != "Activity") {return this;} //not called from Workflow Process, just exit
+	if (thisType != "Activity") {return this;} // not called from Workflow Process, just exit
 
 	q = this.newItem("Workflow Process Activity","get");
 	q.setAttribute("select","source_id(name)");
@@ -39,7 +39,7 @@ string activitiesToPromoteBackToPending = "'Team Review','Final Review'";
 	string wfProcessId = res.getItemByIndex(0).getProperty("source_id","");
 
 	string amlCmd = "";
-	amlCmd += "<Item type='Workflow Process Activity// action='get// select='related_id(keyed_name,state,invalid)'>";
+	amlCmd += "<Item type='Workflow Process Activity' action='get' select='related_id(keyed_name,state,invalid)'>";
 	amlCmd += "	<source_id>" + wfProcessId + "</source_id>";
 	amlCmd += "	<related_id>";
 	amlCmd += "		<Item type='Activity'>";
@@ -52,6 +52,10 @@ string activitiesToPromoteBackToPending = "'Team Review','Final Review'";
 	res = q.apply();
 	if (res.isError()) {return res;}
 
+	// Grant 'Super User' permissions
+	Aras.Server.Security.Identity plmIdentity = Aras.Server.Security.Identity.GetByName("Super User");
+	bool PermissionWasSet = Aras.Server.Security.Permissions.GrantIdentity(plmIdentity);
+	
 	for (int i=0;i<res.getItemCount(); i++) {
 		string fromActivity = res.getItemByIndex(i).getPropertyItem("related_id").getProperty("keyed_name","");
 		string fromActivityState = res.getItemByIndex(i).getPropertyItem("related_id").getProperty("state","");
@@ -59,12 +63,12 @@ string activitiesToPromoteBackToPending = "'Team Review','Final Review'";
 
 		if (fromActivityState == "Closed") {
 			// fetch the activity with relationship data
-		    amlCmd = "<Item type='Activity// action='get// select='*// id='" + fromActivityId + "'>";
+		    amlCmd = "<Item type='Activity' action='get' select='*' id='" + fromActivityId + "'>";
 		    amlCmd += "<Relationships>";
-		    amlCmd += "  <Item type='Activity Assignment// action='get// select='*'/>";
-		    amlCmd += "  <Item type='Activity EMail// action='get// select='*'/>";
-		    amlCmd += "  <Item type='Activity Method// action='get// select='*'/>";
-		    amlCmd += "  <Item type='Activity Task// action='get// select='*'/>";
+		    amlCmd += "  <Item type='Activity Assignment' action='get' select='*'/>";
+		    amlCmd += "  <Item type='Activity EMail' action='get' select='*'/>";
+		    amlCmd += "  <Item type='Activity Method' action='get' select='*'/>";
+		    amlCmd += "  <Item type='Activity Task' action='get' select='*'/>";
 		    amlCmd += "</Relationships>";
 		    amlCmd += "</Item>";
 		    q = this.newItem("","");
@@ -81,7 +85,7 @@ string activitiesToPromoteBackToPending = "'Team Review','Final Review'";
 		    Item newWFpath;
 
 		    // get all wf process paths that go into "fromActivity" and that are not set to complete
-		    amlCmd = "<Item type='Workflow Process Path// action='get// select='*'>";
+		    amlCmd = "<Item type='Workflow Process Path' action='get' select='*'>";
 		    amlCmd += "<is_complete condition='ne'>1</is_complete>";
 		    amlCmd += "<related_id>" + fromActivityId + "</related_id>";
 		    amlCmd += "</Item>";
@@ -98,7 +102,7 @@ string activitiesToPromoteBackToPending = "'Team Review','Final Review'";
 		    } 
 
 		    // get all wf process paths that go out from "fromActivity" and that are not set to complete
-		    amlCmd = "<Item type='Workflow Process Path// action='get// select='*'>";
+		    amlCmd = "<Item type='Workflow Process Path' action='get' select='*'>";
 		    amlCmd += "<is_complete condition='ne'>1</is_complete>";
 		    amlCmd += "<source_id>" + fromActivityId + "</source_id>";
 		    amlCmd += "</Item>";
@@ -134,7 +138,7 @@ string activitiesToPromoteBackToPending = "'Team Review','Final Review'";
 			} 
 
 		    // add newActivity to workflow process (relationship)
-		    amlCmd = "<Item type='Workflow Process Activity// action='add// >";
+		    amlCmd = "<Item type='Workflow Process Activity' action='add' >";
 		    amlCmd += "<source_id>" + wfProcessId + "</source_id>";
 		    amlCmd += "<related_id>" + newActivity.getID() + "</related_id>";
 		    amlCmd += "</Item>";
@@ -144,13 +148,18 @@ string activitiesToPromoteBackToPending = "'Team Review','Final Review'";
 		    if (q.isError()) {return q;}
 		}
 	}
+  
+	// Revoke 'Aras PLM' permissions
+	if (PermissionWasSet)
+		Aras.Server.Security.Permissions.RevokeIdentity(plmIdentity);
+
 	return this;
 }
 
 //--------
 Item addClonedActivity(Item fromItem) {
-  // NOTE: simple .clone() method or 'add// action does not work !
-  // throws an error because ItemType 'Activity// is defined as "dependent" item
+  // NOTE: simple .clone() method or 'add' action does not work !
+  // throws an error because ItemType 'Activity' is defined as "dependent" item
   // The workaround is to force an insert via SQL.
    
   string TN = "[ACTIVITY]";
@@ -190,6 +199,7 @@ Item addClonedActivity(Item fromItem) {
   //clone defined relationships of fromActivity
   Item newRel;
   Item relshipItems = fromItem.getRelationships("Activity Assignment");
+  
   for (int i=0;i<relshipItems.getItemCount();i++) {
   	newRel = relshipItems.getItemByIndex(i).clone(false);
 
@@ -225,7 +235,7 @@ Item addClonedActivity(Item fromItem) {
   	newRel.setProperty("source_id",newActivityId);
   	newRel = newRel.apply();
     if (newRel.isError()) {return newRel;}
-  }  
+  } 
 
   // udpate more props on newActivity
  string[] propsToClone = {"major_rev","timeout_duration","message","reminder_count","is_escalated","escalate_to","subflow","can_refuse","can_delegate","consolidate_ondelegate","reminder_interval","is_auto","x","y","label","wait_for_all_votes","wait_for_all_inputs","role","is_end","is_start","priority","expected_duration","managed_by_id","owned_by_id","team_id"  };
@@ -237,7 +247,6 @@ Item addClonedActivity(Item fromItem) {
     newActivity.setProperty(propsToClone[i], fromItem.getProperty(propsToClone[i],""));
   }  
   newActivity = newActivity.apply();
-  
   return newActivity;
 }
 

@@ -1,0 +1,144 @@
+﻿<AML>
+ <Item type="Form" id="F262140ECF0F49FA992DAD48D3E27A93" action="add">
+  <category_form>0</category_form>
+  <height>234</height>
+  <owned_by_id keyed_name="Innovator Admin" type="Identity">DBA5D86402BF43D5976854B8B48FCDD1</owned_by_id>
+  <stylesheet><![CDATA[../styles/default.css]]></stylesheet>
+  <width>699</width>
+  <name>My Sample WorkflowApprvMatrix</name>
+  <Relationships>
+   <Item type="Body" id="4F9A6E5F6DC54390B181023BD081D70D" action="add">
+    <bg_color>#FFFFFF</bg_color>
+    <owned_by_id keyed_name="Innovator Admin" type="Identity">DBA5D86402BF43D5976854B8B48FCDD1</owned_by_id>
+    <sort_order>128</sort_order>
+    <source_id keyed_name="My Sample WorkflowApprvMatrix" type="Form">F262140ECF0F49FA992DAD48D3E27A93</source_id>
+    <Relationships>
+     <Item type="Field" id="9B90673DE412463A8903E6F0EC493541" action="add">
+      <border_width>0</border_width>
+      <display_length_unit>px</display_length_unit>
+      <field_type>item</field_type>
+      <font_color>#000000</font_color>
+      <font_family>arial, helvetica, sans-serif</font_family>
+      <font_size>8pt</font_size>
+      <font_weight>bold</font_weight>
+      <is_disabled>0</is_disabled>
+      <is_visible>1</is_visible>
+      <label xml:lang="en">Apply to Item Type</label>
+      <label_position>top</label_position>
+      <list_no_blank>0</list_no_blank>
+      <owned_by_id keyed_name="Innovator Admin" type="Identity">DBA5D86402BF43D5976854B8B48FCDD1</owned_by_id>
+      <propertytype_id keyed_name="apply_to_item_type" type="Property">19BD93B78D084315B4668BCD2A16BB3A</propertytype_id>
+      <sort_order>256</sort_order>
+      <source_id keyed_name="4F9A6E5F6DC54390B181023BD081D70D" type="Body">4F9A6E5F6DC54390B181023BD081D70D</source_id>
+      <tab_index>20</tab_index>
+      <tab_stop>1</tab_stop>
+      <x>190</x>
+      <y>50</y>
+      <name>apply_to_item_type</name>
+     </Item>
+     <Item type="Field" id="9D7C10D38F5A41F5849E5B60ACF1FD2E" action="add">
+      <border_width>0</border_width>
+      <display_length_unit>px</display_length_unit>
+      <field_type>textarea</field_type>
+      <font_color>#000000</font_color>
+      <font_family>arial, helvetica, sans-serif</font_family>
+      <font_size>8pt</font_size>
+      <font_weight>bold</font_weight>
+      <is_disabled>0</is_disabled>
+      <is_visible>1</is_visible>
+      <label xml:lang="en">Description</label>
+      <label_position>top</label_position>
+      <list_no_blank>0</list_no_blank>
+      <owned_by_id keyed_name="Innovator Admin" type="Identity">DBA5D86402BF43D5976854B8B48FCDD1</owned_by_id>
+      <propertytype_id keyed_name="description" type="Property">BE5D125591E04437B27798FA42F3E8BB</propertytype_id>
+      <sort_order>512</sort_order>
+      <source_id keyed_name="4F9A6E5F6DC54390B181023BD081D70D" type="Body">4F9A6E5F6DC54390B181023BD081D70D</source_id>
+      <tab_index>100</tab_index>
+      <tab_stop>1</tab_stop>
+      <textarea_cols>350</textarea_cols>
+      <textarea_rows>50</textarea_rows>
+      <x>190</x>
+      <y>130</y>
+      <name>description</name>
+     </Item>
+     <Item type="Field" id="0F336FA284B64C57B3E0A91B2784CEB9" action="add">
+      <display_length_unit>px</display_length_unit>
+      <field_type>html</field_type>
+      <html_code><![CDATA[<span id='ITEM_INFO_INTERNAL_SPAN'/>
+<script>
+  populate_ITEM_INFO_INTERNAL_SPAN = function()
+  {
+    document.getElementById('ITEM_INFO_INTERNAL_SPAN').innerHTML = aras.uiGetItemInfoTable(document.itemType);
+  }
+  window.addEventListener('load', populate_ITEM_INFO_INTERNAL_SPAN);
+</script>]]></html_code>
+      <is_disabled>0</is_disabled>
+      <is_visible>1</is_visible>
+      <list_no_blank>0</list_no_blank>
+      <owned_by_id keyed_name="Innovator Admin" type="Identity">DBA5D86402BF43D5976854B8B48FCDD1</owned_by_id>
+      <sort_order>640</sort_order>
+      <source_id keyed_name="4F9A6E5F6DC54390B181023BD081D70D" type="Body">4F9A6E5F6DC54390B181023BD081D70D</source_id>
+      <tab_stop>0</tab_stop>
+      <x>0</x>
+      <y>0</y>
+      <name>item_info</name>
+     </Item>
+     <Item type="Field" id="7B3E009D27104B5087DAEA7B69F96EF9" action="add">
+      <border_width>0</border_width>
+      <display_length_unit>px</display_length_unit>
+      <field_type>dropdown</field_type>
+      <font_color>#000000</font_color>
+      <font_family>arial, helvetica, sans-serif</font_family>
+      <font_size>8pt</font_size>
+      <font_weight>bold</font_weight>
+      <is_disabled>0</is_disabled>
+      <is_visible>1</is_visible>
+      <label xml:lang="en">org_unit</label>
+      <label_position>top</label_position>
+      <list_no_blank>0</list_no_blank>
+      <owned_by_id keyed_name="Innovator Admin" type="Identity">DBA5D86402BF43D5976854B8B48FCDD1</owned_by_id>
+      <propertytype_id keyed_name="org_unit" type="Property">490ADC7B3A3544C3A40B6BCE9F249777</propertytype_id>
+      <sort_order>128</sort_order>
+      <source_id keyed_name="4F9A6E5F6DC54390B181023BD081D70D" type="Body">4F9A6E5F6DC54390B181023BD081D70D</source_id>
+      <tab_index>10</tab_index>
+      <tab_stop>1</tab_stop>
+      <x>190</x>
+      <y>10</y>
+      <name>org_unit</name>
+     </Item>
+     <Item type="Field" id="9D01EEE963494467829CBB2E5426D8ED" action="add">
+      <border_width>0</border_width>
+      <display_length_unit>px</display_length_unit>
+      <field_type>text</field_type>
+      <font_color>#000000</font_color>
+      <font_family>arial, helvetica, sans-serif</font_family>
+      <font_size>8pt</font_size>
+      <font_weight>bold</font_weight>
+      <is_disabled>0</is_disabled>
+      <is_visible>1</is_visible>
+      <label xml:lang="en">Status</label>
+      <label_position>top</label_position>
+      <list_no_blank>0</list_no_blank>
+      <owned_by_id keyed_name="Innovator Admin" type="Identity">DBA5D86402BF43D5976854B8B48FCDD1</owned_by_id>
+      <sort_order>384</sort_order>
+      <source_id keyed_name="4F9A6E5F6DC54390B181023BD081D70D" type="Body">4F9A6E5F6DC54390B181023BD081D70D</source_id>
+      <tab_index>80</tab_index>
+      <tab_stop>1</tab_stop>
+      <x>189</x>
+      <y>90</y>
+      <name>state</name>
+     </Item>
+    </Relationships>
+   </Item>
+  </Relationships>
+ </Item>
+ <Item type="Field" id="9D01EEE963494467829CBB2E5426D8ED" action="edit">
+  <!-- Please note: this AML depends on the "My Sample WorkflowApprvMatrix" ItemType. Please make sure it exists before running this. -->
+  <propertytype_id>
+   <Item type="Property" action="get" select="id">
+    <name>state</name>
+    <source_id type="ItemType" keyed_name="My Sample WorkflowApprvMatrix">FCFA88D02A5C4599980C06A58A582D0C</source_id>
+   </Item>
+  </propertytype_id>
+ </Item>
+</AML>

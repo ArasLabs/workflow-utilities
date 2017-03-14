@@ -1,0 +1,23 @@
+<!-- use AML-Studio to load this sample configiration, then promote ApproverMatrix to "Active" -->
+
+<AML>
+  <Item action="merge" type="My Sample WorkflowApprvMatrix" typeId="FCFA88D02A5C4599980C06A58A582D0C" id="38A505D7EBDD400E982884A36DBDDD81">
+	<apply_to_item_type keyed_name="My Sample WorkflowForm" type="ItemType" name="My Sample WorkflowForm">0976A110AB6C4F9FBFA9ADD1A7899557</apply_to_item_type>
+	<id keyed_name="38A505D7EBDD400E982884A36DBDDD81" type="My Sample WorkflowApprvMatrix">38A505D7EBDD400E982884A36DBDDD81</id>
+	<org_unit>Org1</org_unit>
+	<Relationships>
+	  <Item action="merge" type="My Sample WorkflowApprvTmpl" typeId="0AA2D31D1D5F4AC785511ED406944266" id="8A860FE7B4D04814B51699BA6CAFABCA">
+		<id keyed_name="8A860FE7B4D04814B51699BA6CAFABCA" type="My Sample WorkflowApprvTmpl">8A860FE7B4D04814B51699BA6CAFABCA</id>
+		<related_id keyed_name="Innovator Admin" type="Identity">
+		  <Item action="get" type="Identity" typeId="E582AB17663F4EF28460015B2BE9E094" id="DBA5D86402BF43D5976854B8B48FCDD1">
+			<id keyed_name="Innovator Admin" type="Identity">DBA5D86402BF43D5976854B8B48FCDD1</id>
+			<keyed_name>Innovator Admin</keyed_name>
+		  </Item>
+		</related_id>
+		<sort_order>1</sort_order>
+		<source_id keyed_name="38A505D7EBDD400E982884A36DBDDD81" type="My Sample WorkflowApprvMatrix">38A505D7EBDD400E982884A36DBDDD81</source_id>
+		<wf_activity_name>Approvals</wf_activity_name>
+	  </Item>
+	</Relationships>
+  </Item>
+</AML>

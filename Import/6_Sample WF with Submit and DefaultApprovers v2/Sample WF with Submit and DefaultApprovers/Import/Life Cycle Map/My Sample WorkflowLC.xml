@@ -1,0 +1,139 @@
+﻿<AML>
+ <Item type="Life Cycle Map" id="D0DB9A2154144FD5A5F2EF03BA5366D4" action="add">
+  <owned_by_id keyed_name="Innovator Admin" type="Identity">DBA5D86402BF43D5976854B8B48FCDD1</owned_by_id>
+  <start_state keyed_name="New" type="Life Cycle State">4D4BEFB89DEA4CFAA2A1D9E15C4D991B</start_state>
+  <name>My Sample WorkflowLC</name>
+  <Relationships>
+   <Item type="Life Cycle State" id="64A4C3C30F4F44F69A2157E887E7C058" action="add">
+    <image>../images/LifeCycleState.svg</image>
+    <owned_by_id keyed_name="Innovator Admin" type="Identity">DBA5D86402BF43D5976854B8B48FCDD1</owned_by_id>
+    <set_is_released>0</set_is_released>
+    <set_not_lockable>0</set_not_lockable>
+    <sort_order>640</sort_order>
+    <source_id keyed_name="My Sample WorkflowLC" type="Life Cycle Map">D0DB9A2154144FD5A5F2EF03BA5366D4</source_id>
+    <x>216</x>
+    <y>135</y>
+    <name>Cancelled</name>
+   </Item>
+   <Item type="Life Cycle State" id="95A9FB3D4F9749358A69EEB181AFEF7E" action="add">
+    <image>../images/LifeCycleState.svg</image>
+    <owned_by_id keyed_name="Innovator Admin" type="Identity">DBA5D86402BF43D5976854B8B48FCDD1</owned_by_id>
+    <set_is_released>0</set_is_released>
+    <set_not_lockable>0</set_not_lockable>
+    <sort_order>384</sort_order>
+    <source_id keyed_name="My Sample WorkflowLC" type="Life Cycle Map">D0DB9A2154144FD5A5F2EF03BA5366D4</source_id>
+    <x>279</x>
+    <y>60</y>
+    <name>In Review</name>
+   </Item>
+   <Item type="Life Cycle State" id="4D4BEFB89DEA4CFAA2A1D9E15C4D991B" action="add">
+    <image>../images/LifeCycleState.svg</image>
+    <owned_by_id keyed_name="Innovator Admin" type="Identity">DBA5D86402BF43D5976854B8B48FCDD1</owned_by_id>
+    <set_is_released>0</set_is_released>
+    <set_not_lockable>0</set_not_lockable>
+    <sort_order>128</sort_order>
+    <source_id keyed_name="My Sample WorkflowLC" type="Life Cycle Map">D0DB9A2154144FD5A5F2EF03BA5366D4</source_id>
+    <x>38</x>
+    <y>62</y>
+    <name>New</name>
+   </Item>
+   <Item type="Life Cycle State" id="0AD588AD1AFB452AACF9E7E007AF2B2F" action="add">
+    <image>../images/LifeCycleState.svg</image>
+    <owned_by_id keyed_name="Innovator Admin" type="Identity">DBA5D86402BF43D5976854B8B48FCDD1</owned_by_id>
+    <set_is_released>0</set_is_released>
+    <set_not_lockable>0</set_not_lockable>
+    <sort_order>512</sort_order>
+    <source_id keyed_name="My Sample WorkflowLC" type="Life Cycle Map">D0DB9A2154144FD5A5F2EF03BA5366D4</source_id>
+    <x>400</x>
+    <y>58</y>
+    <name>Released</name>
+   </Item>
+   <Item type="Life Cycle State" id="F08A00D04250477FB73B6748100566A2" action="add">
+    <image>../images/LifeCycleState.svg</image>
+    <owned_by_id keyed_name="Innovator Admin" type="Identity">DBA5D86402BF43D5976854B8B48FCDD1</owned_by_id>
+    <set_is_released>0</set_is_released>
+    <set_not_lockable>0</set_not_lockable>
+    <sort_order>256</sort_order>
+    <source_id keyed_name="My Sample WorkflowLC" type="Life Cycle Map">D0DB9A2154144FD5A5F2EF03BA5366D4</source_id>
+    <x>159</x>
+    <y>61</y>
+    <name>Submitted</name>
+   </Item>
+   <Item type="Life Cycle Transition" id="B211B8AD19EB4619A5EF6D94222C2083" action="add">
+    <from_state keyed_name="New" type="Life Cycle State">4D4BEFB89DEA4CFAA2A1D9E15C4D991B</from_state>
+    <get_comment>0</get_comment>
+    <owned_by_id keyed_name="Innovator Admin" type="Identity">DBA5D86402BF43D5976854B8B48FCDD1</owned_by_id>
+    <post_action keyed_name="Instantiate Allowed WF by Class" type="Method">
+     <Item type="Method" action="get" select="id">
+      <name>Instantiate Allowed WF by Class</name>
+     </Item>
+    </post_action>
+    <role keyed_name="Creator" type="Identity">
+     <Item type="Identity" action="get" select="id">
+      <name>Creator</name>
+     </Item>
+    </role>
+    <segments />
+    <sort_order>128</sort_order>
+    <source_id keyed_name="My Sample WorkflowLC" type="Life Cycle Map">D0DB9A2154144FD5A5F2EF03BA5366D4</source_id>
+    <to_state keyed_name="Submitted" type="Life Cycle State">F08A00D04250477FB73B6748100566A2</to_state>
+    <x>0</x>
+    <y>0</y>
+   </Item>
+   <Item type="Life Cycle Transition" id="02036E7C202D48218824CDFCA493A7A5" action="add">
+    <from_state keyed_name="In Review" type="Life Cycle State">95A9FB3D4F9749358A69EEB181AFEF7E</from_state>
+    <get_comment>0</get_comment>
+    <owned_by_id keyed_name="Innovator Admin" type="Identity">DBA5D86402BF43D5976854B8B48FCDD1</owned_by_id>
+    <role keyed_name="Aras PLM" type="Identity">56A96DA9E981481688563E2D14D5D878</role>
+    <sort_order>384</sort_order>
+    <source_id keyed_name="My Sample WorkflowLC" type="Life Cycle Map">D0DB9A2154144FD5A5F2EF03BA5366D4</source_id>
+    <to_state keyed_name="Released" type="Life Cycle State">0AD588AD1AFB452AACF9E7E007AF2B2F</to_state>
+   </Item>
+   <Item type="Life Cycle Transition" id="430FB2CA9C064770A9FD211712E72C43" action="add">
+    <from_state keyed_name="In Review" type="Life Cycle State">95A9FB3D4F9749358A69EEB181AFEF7E</from_state>
+    <get_comment>0</get_comment>
+    <owned_by_id keyed_name="Innovator Admin" type="Identity">DBA5D86402BF43D5976854B8B48FCDD1</owned_by_id>
+    <role keyed_name="Aras PLM" type="Identity">56A96DA9E981481688563E2D14D5D878</role>
+    <segments>212,30</segments>
+    <sort_order>768</sort_order>
+    <source_id keyed_name="My Sample WorkflowLC" type="Life Cycle Map">D0DB9A2154144FD5A5F2EF03BA5366D4</source_id>
+    <to_state keyed_name="Submitted" type="Life Cycle State">F08A00D04250477FB73B6748100566A2</to_state>
+    <x>0</x>
+    <y>0</y>
+   </Item>
+   <Item type="Life Cycle Transition" id="F3173BB266954D58A4CB60F1A223C4A0" action="add">
+    <from_state keyed_name="In Review" type="Life Cycle State">95A9FB3D4F9749358A69EEB181AFEF7E</from_state>
+    <get_comment>0</get_comment>
+    <owned_by_id keyed_name="Innovator Admin" type="Identity">DBA5D86402BF43D5976854B8B48FCDD1</owned_by_id>
+    <role keyed_name="Aras PLM" type="Identity">56A96DA9E981481688563E2D14D5D878</role>
+    <segments />
+    <sort_order>640</sort_order>
+    <source_id keyed_name="My Sample WorkflowLC" type="Life Cycle Map">D0DB9A2154144FD5A5F2EF03BA5366D4</source_id>
+    <to_state keyed_name="Cancelled" type="Life Cycle State">64A4C3C30F4F44F69A2157E887E7C058</to_state>
+    <x>-15</x>
+    <y>49</y>
+   </Item>
+   <Item type="Life Cycle Transition" id="3E496A84C1234B1582F6B0CDAA3FB0FF" action="add">
+    <from_state keyed_name="Submitted" type="Life Cycle State">F08A00D04250477FB73B6748100566A2</from_state>
+    <get_comment>0</get_comment>
+    <owned_by_id keyed_name="Innovator Admin" type="Identity">DBA5D86402BF43D5976854B8B48FCDD1</owned_by_id>
+    <role keyed_name="Aras PLM" type="Identity">56A96DA9E981481688563E2D14D5D878</role>
+    <segments />
+    <sort_order>512</sort_order>
+    <source_id keyed_name="My Sample WorkflowLC" type="Life Cycle Map">D0DB9A2154144FD5A5F2EF03BA5366D4</source_id>
+    <to_state keyed_name="Cancelled" type="Life Cycle State">64A4C3C30F4F44F69A2157E887E7C058</to_state>
+    <x>-28</x>
+    <y>52</y>
+   </Item>
+   <Item type="Life Cycle Transition" id="576472F9232446A9AC21E870DEB054DC" action="add">
+    <from_state keyed_name="Submitted" type="Life Cycle State">F08A00D04250477FB73B6748100566A2</from_state>
+    <get_comment>0</get_comment>
+    <owned_by_id keyed_name="Innovator Admin" type="Identity">DBA5D86402BF43D5976854B8B48FCDD1</owned_by_id>
+    <role keyed_name="Aras PLM" type="Identity">56A96DA9E981481688563E2D14D5D878</role>
+    <sort_order>256</sort_order>
+    <source_id keyed_name="My Sample WorkflowLC" type="Life Cycle Map">D0DB9A2154144FD5A5F2EF03BA5366D4</source_id>
+    <to_state keyed_name="In Review" type="Life Cycle State">95A9FB3D4F9749358A69EEB181AFEF7E</to_state>
+   </Item>
+  </Relationships>
+ </Item>
+</AML>

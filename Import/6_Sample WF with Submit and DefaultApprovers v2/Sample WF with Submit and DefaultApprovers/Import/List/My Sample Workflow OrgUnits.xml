@@ -1,0 +1,20 @@
+﻿<AML>
+ <Item type="List" id="4A81394302354E75B92C46D82523E41F" action="add">
+  <owned_by_id keyed_name="Innovator Admin" type="Identity">DBA5D86402BF43D5976854B8B48FCDD1</owned_by_id>
+  <name>My Sample Workflow OrgUnits</name>
+  <Relationships>
+   <Item type="Value" id="DDA93239ECF642E28E4B1BD8E69EC08B" action="add">
+    <owned_by_id keyed_name="Innovator Admin" type="Identity">DBA5D86402BF43D5976854B8B48FCDD1</owned_by_id>
+    <sort_order>128</sort_order>
+    <source_id keyed_name="My Sample Workflow OrgUnits" type="List">4A81394302354E75B92C46D82523E41F</source_id>
+    <value>Org1</value>
+   </Item>
+   <Item type="Value" id="2BA707AF9972490E94332D3CBA52E07B" action="add">
+    <owned_by_id keyed_name="Innovator Admin" type="Identity">DBA5D86402BF43D5976854B8B48FCDD1</owned_by_id>
+    <sort_order>256</sort_order>
+    <source_id keyed_name="My Sample Workflow OrgUnits" type="List">4A81394302354E75B92C46D82523E41F</source_id>
+    <value>Org2</value>
+   </Item>
+  </Relationships>
+ </Item>
+</AML>

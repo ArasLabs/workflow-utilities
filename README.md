@@ -27,6 +27,7 @@ Release notes/descriptions for the original project posted on the previous Aras 
 
 Release | Notes
 --------|--------
+[v3.0](https://github.com/ArasLabs/workflow-utilities/releases/tag/v3.0) | Workflow Utilities Packages. A11SP9 compatible. fixed minor issue with placeholder identity resolution. (read documentation inside .zip)
 [v2.0](https://github.com/ArasLabs/workflow-utilities/releases/tag/v2.0) | Workflow Utilities Packages. A11 compatible. Improved placeholder identity resolution. (read documentation inside .zip)
 [v1.4](https://github.com/ArasLabs/workflow-utilities/releases/tag/v1.4) | Workflow Utilities Packages and Documentation. Improved ad-hoc assignments whith looping activities.
 [v1.2](https://github.com/ArasLabs/workflow-utilities/releases/tag/v1.2) | Workflow Utilities Packages and Documentation
@@ -35,6 +36,7 @@ Release | Notes
 
 Project | Aras
 --------|------
+[v3.0](https://github.com/ArasLabs/workflow-utilities/releases/tag/v3.0) | Aras 11 SP9
 [v2.0](https://github.com/ArasLabs/workflow-utilities/releases/tag/v2.0) | Aras 11
 [v1.4](https://github.com/ArasLabs/workflow-utilities/releases/tag/v1.4) | Aras 10
 [v1.2](https://github.com/ArasLabs/workflow-utilities/releases/tag/v1.2) | Aras 9.3

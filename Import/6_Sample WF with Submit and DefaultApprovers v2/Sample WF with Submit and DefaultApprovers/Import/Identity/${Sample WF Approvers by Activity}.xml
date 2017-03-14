@@ -1,0 +1,12 @@
+﻿<AML>
+ <Item type="Identity" id="909C5BAE4D0C418595D6E8ACA17E1BA3" action="add">
+  <is_alias>0</is_alias>
+  <owned_by_id keyed_name="Innovator Admin" type="Identity">DBA5D86402BF43D5976854B8B48FCDD1</owned_by_id>
+  <place_holder_resolution_rule>&lt;Item type="My Sample WorkflowForm" id="{@id}" &gt;
+ &lt;Relationships&gt;
+   &lt;Item type="My Sample WorkflowApprover" resolveToIdentity="related_id" propertyToMatchActivityName='wf_activity_name' /&gt;
+ &lt;/Relationships&gt;
+&lt;/Item&gt;</place_holder_resolution_rule>
+  <name>${Sample WF Approvers by Activity}</name>
+ </Item>
+</AML>

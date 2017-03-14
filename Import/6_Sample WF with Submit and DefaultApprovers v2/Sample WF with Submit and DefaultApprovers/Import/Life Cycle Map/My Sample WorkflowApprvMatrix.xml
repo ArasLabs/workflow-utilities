@@ -1,0 +1,72 @@
+﻿<AML>
+ <Item type="Life Cycle Map" id="6AF82C862CFE4BA4A97EAD9D796051E5" action="add">
+  <owned_by_id keyed_name="Innovator Admin" type="Identity">DBA5D86402BF43D5976854B8B48FCDD1</owned_by_id>
+  <start_state keyed_name="New" type="Life Cycle State">8CD87FB87BEC40FAA1D895D84EFA4D1D</start_state>
+  <name>My Sample WorkflowApprvMatrix</name>
+  <Relationships>
+   <Item type="Life Cycle State" id="E0558679A15E4CD693E559CF7D9240EE" action="add">
+    <image>../images/LifeCycleState.svg</image>
+    <owned_by_id keyed_name="Innovator Admin" type="Identity">DBA5D86402BF43D5976854B8B48FCDD1</owned_by_id>
+    <set_is_released>0</set_is_released>
+    <set_not_lockable>0</set_not_lockable>
+    <sort_order>256</sort_order>
+    <source_id keyed_name="My Sample WorkflowApprvMatrix" type="Life Cycle Map">6AF82C862CFE4BA4A97EAD9D796051E5</source_id>
+    <x>193</x>
+    <y>46</y>
+    <name>Active</name>
+   </Item>
+   <Item type="Life Cycle State" id="8CD87FB87BEC40FAA1D895D84EFA4D1D" action="add">
+    <image>../images/LifeCycleState.svg</image>
+    <owned_by_id keyed_name="Innovator Admin" type="Identity">DBA5D86402BF43D5976854B8B48FCDD1</owned_by_id>
+    <set_is_released>0</set_is_released>
+    <set_not_lockable>0</set_not_lockable>
+    <sort_order>128</sort_order>
+    <source_id keyed_name="My Sample WorkflowApprvMatrix" type="Life Cycle Map">6AF82C862CFE4BA4A97EAD9D796051E5</source_id>
+    <x>46</x>
+    <y>47</y>
+    <name>New</name>
+   </Item>
+   <Item type="Life Cycle State" id="30CC7916C0E943AE9B5795F583A01F1C" action="add">
+    <image>../images/LifeCycleState.svg</image>
+    <owned_by_id keyed_name="Innovator Admin" type="Identity">DBA5D86402BF43D5976854B8B48FCDD1</owned_by_id>
+    <set_is_released>0</set_is_released>
+    <set_not_lockable>0</set_not_lockable>
+    <sort_order>384</sort_order>
+    <source_id keyed_name="My Sample WorkflowApprvMatrix" type="Life Cycle Map">6AF82C862CFE4BA4A97EAD9D796051E5</source_id>
+    <x>363</x>
+    <y>45</y>
+    <name>Obsolete</name>
+   </Item>
+   <Item type="Life Cycle Transition" id="F59C7735425849EDA8AFF8C9C4AC9EA7" action="add">
+    <from_state keyed_name="Obsolete" type="Life Cycle State">30CC7916C0E943AE9B5795F583A01F1C</from_state>
+    <get_comment>0</get_comment>
+    <owned_by_id keyed_name="Innovator Admin" type="Identity">DBA5D86402BF43D5976854B8B48FCDD1</owned_by_id>
+    <role keyed_name="Administrators" type="Identity">2618D6F5A90949BAA7E920D1B04C7EE1</role>
+    <segments>261,22</segments>
+    <sort_order>384</sort_order>
+    <source_id keyed_name="My Sample WorkflowApprvMatrix" type="Life Cycle Map">6AF82C862CFE4BA4A97EAD9D796051E5</source_id>
+    <to_state keyed_name="Active" type="Life Cycle State">E0558679A15E4CD693E559CF7D9240EE</to_state>
+    <x>-57</x>
+    <y>-33</y>
+   </Item>
+   <Item type="Life Cycle Transition" id="1DFC05BFEDC4405B84CDE0FFCD66CC09" action="add">
+    <from_state keyed_name="New" type="Life Cycle State">8CD87FB87BEC40FAA1D895D84EFA4D1D</from_state>
+    <get_comment>0</get_comment>
+    <owned_by_id keyed_name="Innovator Admin" type="Identity">DBA5D86402BF43D5976854B8B48FCDD1</owned_by_id>
+    <role keyed_name="Administrators" type="Identity">2618D6F5A90949BAA7E920D1B04C7EE1</role>
+    <sort_order>128</sort_order>
+    <source_id keyed_name="My Sample WorkflowApprvMatrix" type="Life Cycle Map">6AF82C862CFE4BA4A97EAD9D796051E5</source_id>
+    <to_state keyed_name="Active" type="Life Cycle State">E0558679A15E4CD693E559CF7D9240EE</to_state>
+   </Item>
+   <Item type="Life Cycle Transition" id="A0B6BD72A5CE488195EC02BC4674CC58" action="add">
+    <from_state keyed_name="Active" type="Life Cycle State">E0558679A15E4CD693E559CF7D9240EE</from_state>
+    <get_comment>0</get_comment>
+    <owned_by_id keyed_name="Innovator Admin" type="Identity">DBA5D86402BF43D5976854B8B48FCDD1</owned_by_id>
+    <role keyed_name="Administrators" type="Identity">2618D6F5A90949BAA7E920D1B04C7EE1</role>
+    <sort_order>256</sort_order>
+    <source_id keyed_name="My Sample WorkflowApprvMatrix" type="Life Cycle Map">6AF82C862CFE4BA4A97EAD9D796051E5</source_id>
+    <to_state keyed_name="Obsolete" type="Life Cycle State">30CC7916C0E943AE9B5795F583A01F1C</to_state>
+   </Item>
+  </Relationships>
+ </Item>
+</AML>

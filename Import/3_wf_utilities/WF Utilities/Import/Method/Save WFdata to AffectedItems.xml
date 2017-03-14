@@ -63,7 +63,7 @@ Item fnGetAffectedItems (Item wfCtrldItem) {
 	  break;
 	}
 
-	string amlCmd = "<Item type='" + affItemRelType + "// action='get// select='id,related_id// serverEvents='0'>";
+	string amlCmd = "<Item type='" + affItemRelType + "' action='get' select='id,related_id' serverEvents='0'>";
 	amlCmd = amlCmd + "<source_id>" + wfCtrldItem.getID() + "</source_id>";
 	amlCmd = amlCmd + "</Item>";
 	Item q = this.newItem("","");
@@ -100,7 +100,7 @@ Item fnUpdateDataOnWfControlledItem (Item wfControlledItem) {
   //...
   //...
  
-  // Revoke 'Aras PLM// permissions
+  // Revoke 'Aras PLM' permissions
   if (PermissionWasSet) {Aras.Server.Security.Permissions.RevokeIdentity(plmIdentity);}
 
   return this;
@@ -129,7 +129,7 @@ Item fnUpdateDataOnAffItem (Item wfControlledItem,Item affectedItem) {
 
   updtItem = updtItem.apply();
 
-  // Revoke 'Aras PLM// permissions
+  // Revoke 'Aras PLM' permissions
   if (PermissionWasSet) {Aras.Server.Security.Permissions.RevokeIdentity(plmIdentity);}
 
   return updtItem;

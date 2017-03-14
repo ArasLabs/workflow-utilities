@@ -1,0 +1,71 @@
+﻿<AML>
+ <Item type="Method" id="508A786215DD444D9DEB2D44A18BFD02" action="add">
+  <execution_allowed_to keyed_name="World" type="Identity">A73B655731924CD0B027E4F4D5FCC0A9</execution_allowed_to>
+  <method_code><![CDATA[// -- main --
+var bShowSubmitButton = false;
+var state = document.thisItem.getProperty("state","");
+var lockStatus = document.thisItem.fetchLockStatus();
+// for debugging:  alert(state+" - "+lockStatus);
+
+if ((lockStatus === 0 || lockStatus === 1) && state === 'New') {
+    bShowSubmitButton = true;
+}
+setFieldVisibleByName('btn_submit', bShowSubmitButton);
+// -- end main --
+
+//---
+function setFieldVisibleByName(fieldName, bShowField) {
+	var fieldElement = getFieldByName(fieldName);
+	
+	if (fieldElement) {
+		var visibility = bShowField ? 'visible' : 'hidden';
+		var display    = bShowField ? ''        : 'none';
+		
+		var fieldStyle = fieldElement.style;
+		fieldStyle.visibility = visibility;
+		fieldStyle.display    = display;	
+	}
+	return;
+}
+
+// -- callback for submit button onClick method
+window.promoteItemToStatus = function(targetState) {
+    // do some validations first
+    if (state === targetState) {
+        top.aras.AlertError("Item is already in state: '"+targetState+"'");
+        return;
+    }
+	if (document.thisItem.getAttribute("isTemp","0") === "1") {
+		top.aras.AlertError("You must save the item first.");
+		return;
+	}
+
+    // unlock item, if locked by user
+    var res;
+    if (lockStatus === 1) {
+        res = document.thisItem.unlockItem();
+        if (res.isError()) {
+            top.aras.AlertError("Unlock failed: '"+res.getErrorString()+"'");
+            return;
+        }
+    }
+	
+    // do the promote action
+    res = document.thisItem.promote(targetState, 'auto promoted');
+    if (res.isError()) {
+        top.aras.AlertError("Submit failed: '"+res.getErrorString()+"'");
+        return;
+    }
+
+    // var wnd = top.aras.getMainWindow();
+    // wnd = wnd === top ? wnd.main : top;
+    // wnd.close();
+
+};
+
+return this;]]></method_code>
+  <method_type>JavaScript</method_type>
+  <owned_by_id keyed_name="Innovator Admin" type="Identity">DBA5D86402BF43D5976854B8B48FCDD1</owned_by_id>
+  <name>My Sample WorkflowForm Populate</name>
+ </Item>
+</AML>

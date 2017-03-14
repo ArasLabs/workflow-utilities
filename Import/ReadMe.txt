@@ -16,11 +16,9 @@ Rolf Laudenbach (rlaudenbach@aras.com)
 
 Version:
 --------
-v2-0  (Apr 2016) - upgraded to work with Aras Innovator 10 & 11
-  - converted VB Methods to C#.
-
-  - improved identity replacement rule syntax to use AML.
-  - updated method "WF ResolvePlaceHolderOnActivity" to read AML like resolution rule. Added support for new rule option "propertyToMatchActivityName".
+v3-0  (Mar 2011) - tested on Aras Innovator 11SP8,SP7,SP9
+  - fixed calculation of "fractional" voting weights.
+  - added a Workflow sample (see installation step 6)
 
 
 Description (Workflow Utilities)
@@ -35,7 +33,7 @@ features. Please read the documentation to learn how to best make use of them.
 
 - Adds a toolbar button on Workflow History Form to open the view of the Workflow Process directly from the “SignOffs” tab
 
-- Logic to change WF Activities’ permissions to allow “adhoc” Workflow Assignments.
+- Logic to change WF Activities’ permissions to allow “adhoc” Workflow Assignments. (no longer required for Aras Innovator 11SP5 and higher)
 	Can be triggered from Life Cycle transitions or when Workflow Activities get activated.
 	An example is added to the Express DCO’s life cycle.
 
@@ -52,6 +50,9 @@ features. Please read the documentation to learn how to best make use of them.
 
 - Sample code to show how to save data from Workflow activities to the item connected to the workflow process.
 
+- A separate package with a custom(sample) Workflow using WF Utiltites to show how to programmatically instantiate a workflow
+  and how to use an approver matrix (do not use in production !)
+
 
 
 Installation Steps
@@ -65,7 +66,7 @@ use package import utility to import packages in this sequence. (logon as "admin
 		- adds Method 'WF ResolvePlaceHolderOnActivity'
 		  this server method does NOT get attached anywhere.
 
-	3_wf_utilities - import as "admin"
+	(Optional) 3_wf_utilities - import as "admin"
 		NOTE: copy the codeTreeOverlay files to your Aras installation folder
 
 		- Adds server methods that change the owned_by_id of all unclosed activities of a started Workflow Process.
@@ -81,6 +82,13 @@ use package import utility to import packages in this sequence. (logon as "admin
 	(Optional) 5_add TeamReview WF to DCO
 		replaces standard workflow "Express DCO" with "Express Team DCO" on item Type Document.
 
+	(Optional) 6_Sample WF with Submit and DefaultApprovers v2
+		This is a sample package using WF Utiltites and to show how to programmatically instantiate a workflow and how to use an approver matrix (do not use in production !)
+		Adds an ItemType "My Sample WorkflowForm" with life cycle and 2 class specific workflows.
+		Adds logic on to post transition to state "Submitted" of life cycle. This will start the appropriate workflow. Also it will look up org specific Approvers from an Approvers Matrix
+		Adds an ItemType "My Sample WorkflowApprvMatrix" to list Approvers by Organization. used in above mentioned logic. Matrix must be promoted to "Active" (else logic will ignore it)
+	
+		When moving WF1 into "In Review" the place holder resolution (WF Utitlites - Case 3+) will kick in and resolve to the assigned Approvers.
 
 
 Dependencies:
@@ -100,6 +108,12 @@ No
 
 Version History:
 --------
+v2-0  (Apr 2016) - upgraded to work with Aras Innovator 10 & 11
+  - converted VB Methods to C#.
+
+  - improved identity replacement rule syntax to use AML.
+  - updated method "WF ResolvePlaceHolderOnActivity" to read AML like resolution rule. Added support for new rule option "propertyToMatchActivityName".
+
 v1-4  (Nov 2012)
   - added "Clone WorkflowActivityToPending" method connectd to onActivate event of "Draw Changes" activiy of 
     "Express Team DCO" workflow. When looping back from "Team Review" to "Draw Changes" the "Team Review" activity
@@ -166,7 +180,7 @@ The "place_holder_resolution_rule"
 ///                     Those found for all relationships shall be used instead of placeholder identity.
 //  placeholder identity name => ${Simple ECO Approvers} 
 //  place_holder_resolution_rule => 
-//			"<Item type="Simple ECO" id="{@id}" >
+//			<Item type="Simple ECO" id="{@id}" >
 //			<Relationships>
 //			  <Item type="Simple ECO Approvers" resolveToIdentity="approver_id" />
 //			</Relationships>
@@ -177,7 +191,7 @@ The "place_holder_resolution_rule"
 ///        		Those found for all relationships shall be used instead of placeholder identity.
 //  placeholder identity name => ${Simple ECO Approvers by Activity}
 //  place_holder_resolution_rule => 
-//			"<Item type="Simple ECO" id="{@id}" >
+//			<Item type="Simple ECO" id="{@id}" >
 //			<Relationships>
 //			  <Item type="Simple ECO Approver" resolveToIdentity="related_id" propertyToMatchActivityName='wf_activity_name' />
 //			</Relationships>

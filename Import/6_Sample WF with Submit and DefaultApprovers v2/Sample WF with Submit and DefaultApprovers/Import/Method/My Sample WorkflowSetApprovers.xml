@@ -1,0 +1,88 @@
+﻿<AML>
+ <Item type="Method" id="F0DECC7E29BD48C893C2DC2CDE98BC98" action="add">
+  <execution_allowed_to keyed_name="World" type="Identity">A73B655731924CD0B027E4F4D5FCC0A9</execution_allowed_to>
+  <method_code><![CDATA[// must be called onBeforeAdd and onBeforeUpdate Events
+
+//System.Diagnostics.Debugger.Break();
+string thisAction = this.getAttribute("action","invalid");
+string orgUnit = this.getProperty("org_unit","invalid");
+
+// read approvers from Approver Matrix:  for given orgUnit, ItemType and in state "Active"
+string qry = "";
+qry += "<Item type=\"My Sample WorkflowApprvMatrix\" action=\"get\" ";
+qry +=   "select=\"state,id,apply_to_item_type,org_unit\" >";
+qry +=  "<state>Active</state>";
+qry +=  "<org_unit>"+orgUnit+"</org_unit>";
+qry +=  "<apply_to_item_type type=\"ItemType\">";
+qry +=   "<Item type=\"ItemType\" action=\"get\" select=\"id\">";
+qry +=     "<name>"+this.getType()+"</name>";
+qry +=   "</Item>";
+qry +=  "</apply_to_item_type>";
+qry +=  "<Relationships>";
+qry +=   "<Item type=\"My Sample WorkflowApprvTmpl\" action=\"get\" ";
+qry +=     "select=\"sort_order,wf_activity_name,related_id(keyed_name)\">";
+qry +=   "</Item>";
+qry +=  "</Relationships>";
+qry += "</Item>";
+
+Item approverMatrix = this.newItem("");
+approverMatrix.loadAML(qry);
+approverMatrix = approverMatrix.apply();
+if (approverMatrix.getItemCount() == 0) {
+    return this;  // nothing to do
+}
+if (approverMatrix.isError()) {
+    return approverMatrix;
+}
+approverMatrix = approverMatrix.getItemByIndex(0);  // use first found, if multiple
+orgUnit = approverMatrix.getProperty("org_unit","invalid");
+string targetApproverRelship = "My Sample WorkflowApprover";
+string targetSourceId = this.getID();
+
+// check existing approvers on thisItem
+Item approvers = this.getRelationships(targetApproverRelship);
+string registeredApproverList = "";
+for (int i=0; i<approvers.getItemCount(); i++) {
+    Item approver = approvers.getItemByIndex(i);
+    
+    string approverIdentityId = approver.getProperty("related_id","");
+    if (approverIdentityId != "") {
+		registeredApproverList += ","+approverIdentityId;
+		registeredApproverList += "|"+approver.getProperty("wf_activity_name","");
+		registeredApproverList += "|"+orgUnit;
+	}
+}
+
+// add approver Relationships to thisItem
+approvers = approverMatrix.getRelationships("My Sample WorkflowApprvTmpl");
+for (int i=0; i<approvers.getItemCount(); i++) {
+    Item approver = approvers.getItemByIndex(i);
+    
+    string approverIdentityId = approver.getProperty("related_id","");
+	string checkKeys = "";
+    if (approverIdentityId != "") {
+		checkKeys += ","+approverIdentityId;
+		checkKeys += "|"+approver.getProperty("wf_activity_name","");
+		checkKeys += "|"+orgUnit;
+		
+		// only unlisted approvers get added
+		if (registeredApproverList.IndexOf(checkKeys) <0) {
+			
+        Item tmp = this.newItem(targetApproverRelship, "add");
+			tmp.setProperty("sort_order", approver.getProperty("sort_order",""));
+			tmp.setProperty("wf_activity_name", approver.getProperty("wf_activity_name",""));
+			tmp.setProperty("org_unit", orgUnit);
+			tmp.setProperty("related_id", approverIdentityId);
+			
+			// add to relationship of context item
+			this.addRelationship(tmp);
+		}
+    }
+}
+return this;
+]]></method_code>
+  <method_type>C#</method_type>
+  <owned_by_id keyed_name="Innovator Admin" type="Identity">DBA5D86402BF43D5976854B8B48FCDD1</owned_by_id>
+  <name>My Sample WorkflowSetApprovers</name>
+ </Item>
+</AML>

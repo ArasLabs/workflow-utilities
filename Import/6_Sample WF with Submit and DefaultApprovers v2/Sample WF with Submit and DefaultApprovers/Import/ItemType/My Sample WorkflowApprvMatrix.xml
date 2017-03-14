@@ -1,0 +1,156 @@
+﻿<AML>
+ <Item type="ItemType" id="FCFA88D02A5C4599980C06A58A582D0C" action="add">
+  <allow_private_permission>1</allow_private_permission>
+  <auto_search>1</auto_search>
+  <enforce_discovery>1</enforce_discovery>
+  <hide_where_used>0</hide_where_used>
+  <implementation_type>table</implementation_type>
+  <instance_data>MY_SAMPLE_WORKFLOWAPPRVMATRIX</instance_data>
+  <is_dependent>0</is_dependent>
+  <is_relationship>0</is_relationship>
+  <is_versionable>0</is_versionable>
+  <label xml:lang="en">Workflow Approvers Matrix</label>
+  <label_plural xml:lang="en">Workflow Approvers Matrix</label_plural>
+  <large_icon>../Images/EnableUser.svg</large_icon>
+  <maxrecords>500</maxrecords>
+  <open_icon>../Images/EnableUser.svg</open_icon>
+  <owned_by_id keyed_name="Innovator Admin" type="Identity">DBA5D86402BF43D5976854B8B48FCDD1</owned_by_id>
+  <revisions keyed_name="Default" type="Revision">7FE395DD8B9F4E1090756A34B733D75E</revisions>
+  <show_parameters_tab>1</show_parameters_tab>
+  <structure_view>tabs on</structure_view>
+  <unlock_on_logout>0</unlock_on_logout>
+  <use_src_access>0</use_src_access>
+  <name>My Sample WorkflowApprvMatrix</name>
+  <Relationships>
+   <Item type="Property" id="19BD93B78D084315B4668BCD2A16BB3A" action="add">
+    <column_alignment>left</column_alignment>
+    <column_width>150</column_width>
+    <data_source keyed_name="ItemType" type="ItemType" name="ItemType">450906E86E304F55A34B3C0D65C097EA</data_source>
+    <data_type>item</data_type>
+    <is_hidden>0</is_hidden>
+    <is_hidden2>0</is_hidden2>
+    <is_indexed>0</is_indexed>
+    <is_keyed>0</is_keyed>
+    <is_multi_valued>0</is_multi_valued>
+    <is_required>0</is_required>
+    <item_behavior>float</item_behavior>
+    <keyed_name_order>2</keyed_name_order>
+    <label xml:lang="en">Apply to Item Type</label>
+    <owned_by_id keyed_name="Innovator Admin" type="Identity">DBA5D86402BF43D5976854B8B48FCDD1</owned_by_id>
+    <range_inclusive>0</range_inclusive>
+    <readonly>0</readonly>
+    <sort_order>20</sort_order>
+    <source_id keyed_name="My Sample WorkflowApprvMatrix" type="ItemType" name="My Sample WorkflowApprvMatrix">FCFA88D02A5C4599980C06A58A582D0C</source_id>
+    <track_history>0</track_history>
+    <name>apply_to_item_type</name>
+   </Item>
+   <Item type="Property" id="BE5D125591E04437B27798FA42F3E8BB" action="add">
+    <column_alignment>left</column_alignment>
+    <column_width>400</column_width>
+    <data_type>string</data_type>
+    <is_hidden>0</is_hidden>
+    <is_hidden2>0</is_hidden2>
+    <is_indexed>0</is_indexed>
+    <is_keyed>0</is_keyed>
+    <is_multi_valued>0</is_multi_valued>
+    <is_required>0</is_required>
+    <label xml:lang="en">Description</label>
+    <owned_by_id keyed_name="Innovator Admin" type="Identity">DBA5D86402BF43D5976854B8B48FCDD1</owned_by_id>
+    <range_inclusive>0</range_inclusive>
+    <readonly>0</readonly>
+    <sort_order>100</sort_order>
+    <source_id keyed_name="My Sample WorkflowApprvMatrix" type="ItemType" name="My Sample WorkflowApprvMatrix">FCFA88D02A5C4599980C06A58A582D0C</source_id>
+    <stored_length>255</stored_length>
+    <track_history>0</track_history>
+    <name>description</name>
+   </Item>
+   <Item type="Property" id="490ADC7B3A3544C3A40B6BCE9F249777" action="add">
+    <column_alignment>left</column_alignment>
+    <column_width>150</column_width>
+    <data_source keyed_name="My Sample Workflow OrgUnits">4A81394302354E75B92C46D82523E41F</data_source>
+    <data_type>list</data_type>
+    <is_hidden>0</is_hidden>
+    <is_hidden2>0</is_hidden2>
+    <is_indexed>0</is_indexed>
+    <is_keyed>0</is_keyed>
+    <is_multi_valued>0</is_multi_valued>
+    <is_required>0</is_required>
+    <keyed_name_order>1</keyed_name_order>
+    <label xml:lang="en">Org Unit</label>
+    <owned_by_id keyed_name="Innovator Admin" type="Identity">DBA5D86402BF43D5976854B8B48FCDD1</owned_by_id>
+    <range_inclusive>0</range_inclusive>
+    <readonly>0</readonly>
+    <sort_order>10</sort_order>
+    <source_id keyed_name="My Sample WorkflowApprvMatrix" type="ItemType" name="My Sample WorkflowApprvMatrix">FCFA88D02A5C4599980C06A58A582D0C</source_id>
+    <stored_length>256</stored_length>
+    <track_history>0</track_history>
+    <name>org_unit</name>
+   </Item>
+   <Item type="View" id="E8CE882E211B49B4903CAA5C88226386" action="add">
+    <client>js</client>
+    <owned_by_id keyed_name="Innovator Admin" type="Identity">DBA5D86402BF43D5976854B8B48FCDD1</owned_by_id>
+    <related_id keyed_name="My Sample WorkflowApprvMatrix" type="Form">F262140ECF0F49FA992DAD48D3E27A93</related_id>
+    <role keyed_name="World" type="Identity">
+     <Item type="Identity" action="get" select="id">
+      <name>World</name>
+     </Item>
+    </role>
+    <show_ssvc>0</show_ssvc>
+    <sort_order>128</sort_order>
+    <source_id keyed_name="My Sample WorkflowApprvMatrix" type="ItemType" name="My Sample WorkflowApprvMatrix">FCFA88D02A5C4599980C06A58A582D0C</source_id>
+    <type>default</type>
+   </Item>
+   <Item type="ItemType Life Cycle" id="90543C4FD76F4F3D8E4B614FEE361587" action="add">
+    <owned_by_id keyed_name="Innovator Admin" type="Identity">DBA5D86402BF43D5976854B8B48FCDD1</owned_by_id>
+    <related_id keyed_name="My Sample WorkflowApprvMatrix" type="Life Cycle Map">6AF82C862CFE4BA4A97EAD9D796051E5</related_id>
+    <sort_order>128</sort_order>
+    <source_id keyed_name="My Sample WorkflowApprvMatrix" type="ItemType" name="My Sample WorkflowApprvMatrix">FCFA88D02A5C4599980C06A58A582D0C</source_id>
+   </Item>
+   <Item type="TOC Access" id="B3ADBC1455A64EBAA38565E7D5EE5751" action="add">
+    <owned_by_id keyed_name="Innovator Admin" type="Identity">DBA5D86402BF43D5976854B8B48FCDD1</owned_by_id>
+    <related_id keyed_name="Administrators" type="Identity">2618D6F5A90949BAA7E920D1B04C7EE1</related_id>
+    <sort_order>128</sort_order>
+    <source_id keyed_name="My Sample WorkflowApprvMatrix" type="ItemType" name="My Sample WorkflowApprvMatrix">FCFA88D02A5C4599980C06A58A582D0C</source_id>
+    <category>Administration</category>
+   </Item>
+   <Item type="Can Add" id="F46CBC3127E540A882AF58EC6D9E6FD8" action="add">
+    <can_add>1</can_add>
+    <owned_by_id keyed_name="Innovator Admin" type="Identity">DBA5D86402BF43D5976854B8B48FCDD1</owned_by_id>
+    <related_id keyed_name="Administrators" type="Identity">2618D6F5A90949BAA7E920D1B04C7EE1</related_id>
+    <sort_order>128</sort_order>
+    <source_id keyed_name="My Sample WorkflowApprvMatrix" type="ItemType" name="My Sample WorkflowApprvMatrix">FCFA88D02A5C4599980C06A58A582D0C</source_id>
+   </Item>
+   <Item type="Allowed Permission" id="42AE9C35564E40BC8C6C87F1F7C20C61" action="add">
+    <is_default>1</is_default>
+    <owned_by_id keyed_name="Innovator Admin" type="Identity">DBA5D86402BF43D5976854B8B48FCDD1</owned_by_id>
+    <related_id keyed_name="Default Access" type="Permission">9122CD065CF04141B8EFE263FC80BEA4</related_id>
+    <sort_order>128</sort_order>
+    <source_id keyed_name="My Sample WorkflowApprvMatrix" type="ItemType" name="My Sample WorkflowApprvMatrix">FCFA88D02A5C4599980C06A58A582D0C</source_id>
+   </Item>
+  </Relationships>
+ </Item>
+ <Item type="ItemType" id="FCFA88D02A5C4599980C06A58A582D0C" action="edit">
+  <Relationships>
+   <Item type="Property" action="edit" where="source_id='FCFA88D02A5C4599980C06A58A582D0C' and name='state'">
+    <column_alignment>left</column_alignment>
+    <column_width>80</column_width>
+    <data_type>string</data_type>
+    <is_hidden>0</is_hidden>
+    <is_hidden2>0</is_hidden2>
+    <is_indexed>0</is_indexed>
+    <is_keyed>0</is_keyed>
+    <is_multi_valued>0</is_multi_valued>
+    <is_required>0</is_required>
+    <label xml:lang="en">Status</label>
+    <owned_by_id keyed_name="Innovator Admin" type="Identity">DBA5D86402BF43D5976854B8B48FCDD1</owned_by_id>
+    <range_inclusive>0</range_inclusive>
+    <readonly>1</readonly>
+    <sort_order>15</sort_order>
+    <source_id keyed_name="My Sample WorkflowApprvMatrix" type="ItemType" name="My Sample WorkflowApprvMatrix">FCFA88D02A5C4599980C06A58A582D0C</source_id>
+    <stored_length>32</stored_length>
+    <track_history>0</track_history>
+    <name>state</name>
+   </Item>
+  </Relationships>
+ </Item>
+</AML>

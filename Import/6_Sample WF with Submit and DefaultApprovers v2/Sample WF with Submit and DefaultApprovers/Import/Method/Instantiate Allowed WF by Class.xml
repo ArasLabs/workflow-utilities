@@ -1,0 +1,41 @@
+﻿<AML>
+ <Item type="Method" id="1351AECAA31B4F9BA363A28AAF77D567" action="add">
+  <comments>Sample code: gets allowed WFs on 'this'. Starts WF with description = classification</comments>
+  <execution_allowed_to keyed_name="World" type="Identity">A73B655731924CD0B027E4F4D5FCC0A9</execution_allowed_to>
+  <method_code><![CDATA[// assumes to be called on Life Cycle post-transition
+// all "Allowed Workflows" on this ItemType must have "default" checkbox "off" !!!
+// context item is the item the Life Cycle is connected to
+
+//System.Diagnostics.Debugger.Break();
+
+//get classification of this item.
+string itemClass = this.getProperty("classification","default");
+
+// get registered Workflows on ItemType 
+Innovator inn = this.getInnovator();
+Item qry = this.newItem("ItemType","get");
+qry.setProperty("name",this.getType());
+qry = qry.apply();
+if (qry.isError()) {return qry;}
+
+string typeId = qry.getID();
+qry = this.newItem("Allowed Workflow","get");
+qry.setProperty("source_id",typeId);
+qry = qry.apply();
+
+//if classification matches decription of an allowed workflow, start this workflow.
+for(int i=0; i<qry.getItemCount(); i++) {
+	string wfDescr = qry.getItemByIndex(i).getPropertyItem("related_id").getProperty("description","");
+	if (wfDescr.IndexOf(itemClass) >= 0) {
+		Item myWF = this.instantiateWorkflow(qry.getItemByIndex(i).getProperty("related_id","invalid"));
+		myWF = myWF.apply("startWorkflow");
+		if (myWF.isError()) {return myWF;}
+	}
+}
+
+return this;]]></method_code>
+  <method_type>C#</method_type>
+  <owned_by_id keyed_name="Innovator Admin" type="Identity">DBA5D86402BF43D5976854B8B48FCDD1</owned_by_id>
+  <name>Instantiate Allowed WF by Class</name>
+ </Item>
+</AML>

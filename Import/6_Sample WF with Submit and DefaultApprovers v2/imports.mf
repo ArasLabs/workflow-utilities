@@ -1,0 +1,5 @@
+<imports>
+  <package name="Sample WF with Submit and DefaultApprovers" path="Sample WF with Submit and DefaultApprovers\Import">
+    <dependson name="WF Utilities" />
+  </package>
+</imports>
